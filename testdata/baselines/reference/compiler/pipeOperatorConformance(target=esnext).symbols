@@ -1,0 +1,556 @@
+//// [tests/cases/compiler/pipeOperatorConformance.ts] ////
+
+=== pipeOperatorConformance.ts ===
+function equal(actual: unknown, expected: unknown): void {
+>equal : Symbol(equal, Decl(pipeOperatorConformance.ts, 0, 0))
+>actual : Symbol(actual, Decl(pipeOperatorConformance.ts, 0, 15))
+>expected : Symbol(expected, Decl(pipeOperatorConformance.ts, 0, 31))
+
+    if (!Object.is(actual, expected)) throw new Error(`${actual} != ${expected}`);
+>Object.is : Symbol(ObjectConstructor.is, Decl(lib.es2015.core.d.ts, --, --))
+>Object : Symbol(Object, Decl(lib.es5.d.ts, --, --), Decl(lib.es5.d.ts, --, --))
+>is : Symbol(ObjectConstructor.is, Decl(lib.es2015.core.d.ts, --, --))
+>actual : Symbol(actual, Decl(pipeOperatorConformance.ts, 0, 15))
+>expected : Symbol(expected, Decl(pipeOperatorConformance.ts, 0, 31))
+>Error : Symbol(Error, Decl(lib.es5.d.ts, --, --), Decl(lib.es5.d.ts, --, --), Decl(lib.es2022.error.d.ts, --, --))
+>actual : Symbol(actual, Decl(pipeOperatorConformance.ts, 0, 15))
+>expected : Symbol(expected, Decl(pipeOperatorConformance.ts, 0, 31))
+}
+
+function identity<T>(value: T): T { return value; }
+>identity : Symbol(identity, Decl(pipeOperatorConformance.ts, 2, 1))
+>T : Symbol(T, Decl(pipeOperatorConformance.ts, 4, 18))
+>value : Symbol(value, Decl(pipeOperatorConformance.ts, 4, 21))
+>T : Symbol(T, Decl(pipeOperatorConformance.ts, 4, 18))
+>T : Symbol(T, Decl(pipeOperatorConformance.ts, 4, 18))
+>value : Symbol(value, Decl(pipeOperatorConformance.ts, 4, 21))
+
+function box<T>(value: T): { value: T } { return { value }; }
+>box : Symbol(box, Decl(pipeOperatorConformance.ts, 4, 51))
+>T : Symbol(T, Decl(pipeOperatorConformance.ts, 5, 13))
+>value : Symbol(value, Decl(pipeOperatorConformance.ts, 5, 16))
+>T : Symbol(T, Decl(pipeOperatorConformance.ts, 5, 13))
+>value : Symbol(value, Decl(pipeOperatorConformance.ts, 5, 28))
+>T : Symbol(T, Decl(pipeOperatorConformance.ts, 5, 13))
+>value : Symbol(value, Decl(pipeOperatorConformance.ts, 5, 50))
+
+function select(value: number): number;
+>select : Symbol(select, Decl(pipeOperatorConformance.ts, 5, 61), Decl(pipeOperatorConformance.ts, 6, 39), Decl(pipeOperatorConformance.ts, 7, 39))
+>value : Symbol(value, Decl(pipeOperatorConformance.ts, 6, 16))
+
+function select(value: string): string;
+>select : Symbol(select, Decl(pipeOperatorConformance.ts, 5, 61), Decl(pipeOperatorConformance.ts, 6, 39), Decl(pipeOperatorConformance.ts, 7, 39))
+>value : Symbol(value, Decl(pipeOperatorConformance.ts, 7, 16))
+
+function select(value: number | string) { return value; }
+>select : Symbol(select, Decl(pipeOperatorConformance.ts, 5, 61), Decl(pipeOperatorConformance.ts, 6, 39), Decl(pipeOperatorConformance.ts, 7, 39))
+>value : Symbol(value, Decl(pipeOperatorConformance.ts, 8, 16))
+>value : Symbol(value, Decl(pipeOperatorConformance.ts, 8, 16))
+
+function pair(count: number, text: string) { return { count, text }; }
+>pair : Symbol(pair, Decl(pipeOperatorConformance.ts, 8, 57))
+>count : Symbol(count, Decl(pipeOperatorConformance.ts, 9, 14))
+>text : Symbol(text, Decl(pipeOperatorConformance.ts, 9, 28))
+>count : Symbol(count, Decl(pipeOperatorConformance.ts, 9, 53))
+>text : Symbol(text, Decl(pipeOperatorConformance.ts, 9, 60))
+
+function sum(a: number = 7, b: number = 8) { return a + b; }
+>sum : Symbol(sum, Decl(pipeOperatorConformance.ts, 9, 70))
+>a : Symbol(a, Decl(pipeOperatorConformance.ts, 10, 13))
+>b : Symbol(b, Decl(pipeOperatorConformance.ts, 10, 27))
+>a : Symbol(a, Decl(pipeOperatorConformance.ts, 10, 13))
+>b : Symbol(b, Decl(pipeOperatorConformance.ts, 10, 27))
+
+function join(head: string, ...tail: number[]) { return head + tail.join(","); }
+>join : Symbol(join, Decl(pipeOperatorConformance.ts, 10, 60))
+>head : Symbol(head, Decl(pipeOperatorConformance.ts, 11, 14))
+>tail : Symbol(tail, Decl(pipeOperatorConformance.ts, 11, 27))
+>head : Symbol(head, Decl(pipeOperatorConformance.ts, 11, 14))
+>tail.join : Symbol(Array.join, Decl(lib.es5.d.ts, --, --))
+>tail : Symbol(tail, Decl(pipeOperatorConformance.ts, 11, 27))
+>join : Symbol(Array.join, Decl(lib.es5.d.ts, --, --))
+
+function callback(fn: (value: string) => number, value: string) { return fn(value); }
+>callback : Symbol(callback, Decl(pipeOperatorConformance.ts, 11, 80))
+>fn : Symbol(fn, Decl(pipeOperatorConformance.ts, 12, 18))
+>value : Symbol(value, Decl(pipeOperatorConformance.ts, 12, 23))
+>value : Symbol(value, Decl(pipeOperatorConformance.ts, 12, 48))
+>fn : Symbol(fn, Decl(pipeOperatorConformance.ts, 12, 18))
+>value : Symbol(value, Decl(pipeOperatorConformance.ts, 12, 48))
+
+function capture<T extends unknown[]>(...args: T): T { return args; }
+>capture : Symbol(capture, Decl(pipeOperatorConformance.ts, 12, 85))
+>T : Symbol(T, Decl(pipeOperatorConformance.ts, 13, 17))
+>args : Symbol(args, Decl(pipeOperatorConformance.ts, 13, 38))
+>T : Symbol(T, Decl(pipeOperatorConformance.ts, 13, 17))
+>T : Symbol(T, Decl(pipeOperatorConformance.ts, 13, 17))
+>args : Symbol(args, Decl(pipeOperatorConformance.ts, 13, 38))
+
+export const chain = "hello" |> (value => value.length) |> identity |> box;
+>chain : Symbol(chain, Decl(pipeOperatorConformance.ts, 15, 12))
+>value : Symbol(value, Decl(pipeOperatorConformance.ts, 15, 33))
+>value.length : Symbol(String.length, Decl(lib.es5.d.ts, --, --))
+>value : Symbol(value, Decl(pipeOperatorConformance.ts, 15, 33))
+>length : Symbol(String.length, Decl(lib.es5.d.ts, --, --))
+>identity : Symbol(identity, Decl(pipeOperatorConformance.ts, 2, 1))
+>box : Symbol(box, Decl(pipeOperatorConformance.ts, 4, 51))
+
+export const numberOverload = 1 |> select;
+>numberOverload : Symbol(numberOverload, Decl(pipeOperatorConformance.ts, 16, 12))
+>select : Symbol(select, Decl(pipeOperatorConformance.ts, 5, 61), Decl(pipeOperatorConformance.ts, 6, 39), Decl(pipeOperatorConformance.ts, 7, 39))
+
+export const stringOverload = "x" |> select;
+>stringOverload : Symbol(stringOverload, Decl(pipeOperatorConformance.ts, 17, 12))
+>select : Symbol(select, Decl(pipeOperatorConformance.ts, 5, 61), Decl(pipeOperatorConformance.ts, 6, 39), Decl(pipeOperatorConformance.ts, 7, 39))
+
+export const explicit = ...[2, "two"] |> pair;
+>explicit : Symbol(explicit, Decl(pipeOperatorConformance.ts, 18, 12))
+>pair : Symbol(pair, Decl(pipeOperatorConformance.ts, 8, 57))
+
+const tuple = [3, "three"] as const;
+>tuple : Symbol(tuple, Decl(pipeOperatorConformance.ts, 19, 5))
+>const : Symbol(const)
+
+export const fixedTuple = ...[...tuple] |> pair;
+>fixedTuple : Symbol(fixedTuple, Decl(pipeOperatorConformance.ts, 20, 12))
+>tuple : Symbol(tuple, Decl(pipeOperatorConformance.ts, 19, 5))
+>pair : Symbol(pair, Decl(pipeOperatorConformance.ts, 8, 57))
+
+export const genericTuple = ...[1, "x", true] |> capture;
+>genericTuple : Symbol(genericTuple, Decl(pipeOperatorConformance.ts, 21, 12))
+>capture : Symbol(capture, Decl(pipeOperatorConformance.ts, 12, 85))
+
+export const arrayValue = [1, 2] |> (values => values.length);
+>arrayValue : Symbol(arrayValue, Decl(pipeOperatorConformance.ts, 22, 12))
+>values : Symbol(values, Decl(pipeOperatorConformance.ts, 22, 37))
+>values.length : Symbol(Array.length, Decl(lib.es5.d.ts, --, --))
+>values : Symbol(values, Decl(pipeOperatorConformance.ts, 22, 37))
+>length : Symbol(Array.length, Decl(lib.es5.d.ts, --, --))
+
+const values = [1, 2, 99];
+>values : Symbol(values, Decl(pipeOperatorConformance.ts, 23, 5))
+
+const empty: number[] = [];
+>empty : Symbol(empty, Decl(pipeOperatorConformance.ts, 24, 5))
+
+export const arrayArguments = ...[...values] |> sum;
+>arrayArguments : Symbol(arrayArguments, Decl(pipeOperatorConformance.ts, 25, 12))
+>values : Symbol(values, Decl(pipeOperatorConformance.ts, 23, 5))
+>sum : Symbol(sum, Decl(pipeOperatorConformance.ts, 9, 70))
+
+export const missingArguments = ...[...empty] |> sum;
+>missingArguments : Symbol(missingArguments, Decl(pipeOperatorConformance.ts, 26, 12))
+>empty : Symbol(empty, Decl(pipeOperatorConformance.ts, 24, 5))
+>sum : Symbol(sum, Decl(pipeOperatorConformance.ts, 9, 70))
+
+export const optionalArgument = ...[1] |> sum;
+>optionalArgument : Symbol(optionalArgument, Decl(pipeOperatorConformance.ts, 27, 12))
+>sum : Symbol(sum, Decl(pipeOperatorConformance.ts, 9, 70))
+
+export const restArguments = ...["n=", ...values] |> join;
+>restArguments : Symbol(restArguments, Decl(pipeOperatorConformance.ts, 28, 12))
+>values : Symbol(values, Decl(pipeOperatorConformance.ts, 23, 5))
+>join : Symbol(join, Decl(pipeOperatorConformance.ts, 10, 60))
+
+export const contextualCallback = ...[value => value.length, "hello"] |> callback;
+>contextualCallback : Symbol(contextualCallback, Decl(pipeOperatorConformance.ts, 29, 12))
+>value : Symbol(value, Decl(pipeOperatorConformance.ts, 29, 38))
+>value.length : Symbol(String.length, Decl(lib.es5.d.ts, --, --))
+>value : Symbol(value, Decl(pipeOperatorConformance.ts, 29, 38))
+>length : Symbol(String.length, Decl(lib.es5.d.ts, --, --))
+>callback : Symbol(callback, Decl(pipeOperatorConformance.ts, 11, 80))
+
+const object = {
+>object : Symbol(object, Decl(pipeOperatorConformance.ts, 30, 5))
+
+    offset: 10,
+>offset : Symbol(offset, Decl(pipeOperatorConformance.ts, 30, 16))
+
+    method(this: { offset: number }, n: number) { return this.offset + n; },
+>method : Symbol(method, Decl(pipeOperatorConformance.ts, 31, 15))
+>this : Symbol(this, Decl(pipeOperatorConformance.ts, 32, 11))
+>offset : Symbol(offset, Decl(pipeOperatorConformance.ts, 32, 18))
+>n : Symbol(n, Decl(pipeOperatorConformance.ts, 32, 36))
+>this.offset : Symbol(offset, Decl(pipeOperatorConformance.ts, 32, 18))
+>this : Symbol(this, Decl(pipeOperatorConformance.ts, 32, 11))
+>offset : Symbol(offset, Decl(pipeOperatorConformance.ts, 32, 18))
+>n : Symbol(n, Decl(pipeOperatorConformance.ts, 32, 36))
+
+};
+export const receiver = 2 |> object.method;
+>receiver : Symbol(receiver, Decl(pipeOperatorConformance.ts, 34, 12))
+>object.method : Symbol(method, Decl(pipeOperatorConformance.ts, 31, 15))
+>object : Symbol(object, Decl(pipeOperatorConformance.ts, 30, 5))
+>method : Symbol(method, Decl(pipeOperatorConformance.ts, 31, 15))
+
+export const computedReceiver = 3 |> object["method"];
+>computedReceiver : Symbol(computedReceiver, Decl(pipeOperatorConformance.ts, 35, 12))
+>object : Symbol(object, Decl(pipeOperatorConformance.ts, 30, 5))
+>"method" : Symbol(method, Decl(pipeOperatorConformance.ts, 31, 15))
+
+equal(chain.value, box(identity("hello".length)).value);
+>equal : Symbol(equal, Decl(pipeOperatorConformance.ts, 0, 0))
+>chain.value : Symbol(value, Decl(pipeOperatorConformance.ts, 5, 28))
+>chain : Symbol(chain, Decl(pipeOperatorConformance.ts, 15, 12))
+>value : Symbol(value, Decl(pipeOperatorConformance.ts, 5, 28))
+>box(identity("hello".length)).value : Symbol(value, Decl(pipeOperatorConformance.ts, 5, 28))
+>box : Symbol(box, Decl(pipeOperatorConformance.ts, 4, 51))
+>identity : Symbol(identity, Decl(pipeOperatorConformance.ts, 2, 1))
+>"hello".length : Symbol(String.length, Decl(lib.es5.d.ts, --, --))
+>length : Symbol(String.length, Decl(lib.es5.d.ts, --, --))
+>value : Symbol(value, Decl(pipeOperatorConformance.ts, 5, 28))
+
+equal(numberOverload, select(1));
+>equal : Symbol(equal, Decl(pipeOperatorConformance.ts, 0, 0))
+>numberOverload : Symbol(numberOverload, Decl(pipeOperatorConformance.ts, 16, 12))
+>select : Symbol(select, Decl(pipeOperatorConformance.ts, 5, 61), Decl(pipeOperatorConformance.ts, 6, 39), Decl(pipeOperatorConformance.ts, 7, 39))
+
+equal(stringOverload, select("x"));
+>equal : Symbol(equal, Decl(pipeOperatorConformance.ts, 0, 0))
+>stringOverload : Symbol(stringOverload, Decl(pipeOperatorConformance.ts, 17, 12))
+>select : Symbol(select, Decl(pipeOperatorConformance.ts, 5, 61), Decl(pipeOperatorConformance.ts, 6, 39), Decl(pipeOperatorConformance.ts, 7, 39))
+
+equal(explicit.text, pair(2, "two").text);
+>equal : Symbol(equal, Decl(pipeOperatorConformance.ts, 0, 0))
+>explicit.text : Symbol(text, Decl(pipeOperatorConformance.ts, 9, 60))
+>explicit : Symbol(explicit, Decl(pipeOperatorConformance.ts, 18, 12))
+>text : Symbol(text, Decl(pipeOperatorConformance.ts, 9, 60))
+>pair(2, "two").text : Symbol(text, Decl(pipeOperatorConformance.ts, 9, 60))
+>pair : Symbol(pair, Decl(pipeOperatorConformance.ts, 8, 57))
+>text : Symbol(text, Decl(pipeOperatorConformance.ts, 9, 60))
+
+equal(fixedTuple.count, pair(...tuple).count);
+>equal : Symbol(equal, Decl(pipeOperatorConformance.ts, 0, 0))
+>fixedTuple.count : Symbol(count, Decl(pipeOperatorConformance.ts, 9, 53))
+>fixedTuple : Symbol(fixedTuple, Decl(pipeOperatorConformance.ts, 20, 12))
+>count : Symbol(count, Decl(pipeOperatorConformance.ts, 9, 53))
+>pair(...tuple).count : Symbol(count, Decl(pipeOperatorConformance.ts, 9, 53))
+>pair : Symbol(pair, Decl(pipeOperatorConformance.ts, 8, 57))
+>tuple : Symbol(tuple, Decl(pipeOperatorConformance.ts, 19, 5))
+>count : Symbol(count, Decl(pipeOperatorConformance.ts, 9, 53))
+
+equal(genericTuple.join(), capture(1, "x", true).join());
+>equal : Symbol(equal, Decl(pipeOperatorConformance.ts, 0, 0))
+>genericTuple.join : Symbol(Array.join, Decl(lib.es5.d.ts, --, --))
+>genericTuple : Symbol(genericTuple, Decl(pipeOperatorConformance.ts, 21, 12))
+>join : Symbol(Array.join, Decl(lib.es5.d.ts, --, --))
+>capture(1, "x", true).join : Symbol(Array.join, Decl(lib.es5.d.ts, --, --))
+>capture : Symbol(capture, Decl(pipeOperatorConformance.ts, 12, 85))
+>join : Symbol(Array.join, Decl(lib.es5.d.ts, --, --))
+
+equal(arrayValue, [1, 2].length);
+>equal : Symbol(equal, Decl(pipeOperatorConformance.ts, 0, 0))
+>arrayValue : Symbol(arrayValue, Decl(pipeOperatorConformance.ts, 22, 12))
+>[1, 2].length : Symbol(Array.length, Decl(lib.es5.d.ts, --, --))
+>length : Symbol(Array.length, Decl(lib.es5.d.ts, --, --))
+
+equal(arrayArguments, sum(values[0], values[1]));
+>equal : Symbol(equal, Decl(pipeOperatorConformance.ts, 0, 0))
+>arrayArguments : Symbol(arrayArguments, Decl(pipeOperatorConformance.ts, 25, 12))
+>sum : Symbol(sum, Decl(pipeOperatorConformance.ts, 9, 70))
+>values : Symbol(values, Decl(pipeOperatorConformance.ts, 23, 5))
+>values : Symbol(values, Decl(pipeOperatorConformance.ts, 23, 5))
+
+equal(missingArguments, sum());
+>equal : Symbol(equal, Decl(pipeOperatorConformance.ts, 0, 0))
+>missingArguments : Symbol(missingArguments, Decl(pipeOperatorConformance.ts, 26, 12))
+>sum : Symbol(sum, Decl(pipeOperatorConformance.ts, 9, 70))
+
+equal(optionalArgument, sum(1));
+>equal : Symbol(equal, Decl(pipeOperatorConformance.ts, 0, 0))
+>optionalArgument : Symbol(optionalArgument, Decl(pipeOperatorConformance.ts, 27, 12))
+>sum : Symbol(sum, Decl(pipeOperatorConformance.ts, 9, 70))
+
+equal(restArguments, join("n=", ...values));
+>equal : Symbol(equal, Decl(pipeOperatorConformance.ts, 0, 0))
+>restArguments : Symbol(restArguments, Decl(pipeOperatorConformance.ts, 28, 12))
+>join : Symbol(join, Decl(pipeOperatorConformance.ts, 10, 60))
+>values : Symbol(values, Decl(pipeOperatorConformance.ts, 23, 5))
+
+equal(contextualCallback, callback(value => value.length, "hello"));
+>equal : Symbol(equal, Decl(pipeOperatorConformance.ts, 0, 0))
+>contextualCallback : Symbol(contextualCallback, Decl(pipeOperatorConformance.ts, 29, 12))
+>callback : Symbol(callback, Decl(pipeOperatorConformance.ts, 11, 80))
+>value : Symbol(value, Decl(pipeOperatorConformance.ts, 48, 35))
+>value.length : Symbol(String.length, Decl(lib.es5.d.ts, --, --))
+>value : Symbol(value, Decl(pipeOperatorConformance.ts, 48, 35))
+>length : Symbol(String.length, Decl(lib.es5.d.ts, --, --))
+
+equal(receiver, object.method(2));
+>equal : Symbol(equal, Decl(pipeOperatorConformance.ts, 0, 0))
+>receiver : Symbol(receiver, Decl(pipeOperatorConformance.ts, 34, 12))
+>object.method : Symbol(method, Decl(pipeOperatorConformance.ts, 31, 15))
+>object : Symbol(object, Decl(pipeOperatorConformance.ts, 30, 5))
+>method : Symbol(method, Decl(pipeOperatorConformance.ts, 31, 15))
+
+equal(computedReceiver, object["method"](3));
+>equal : Symbol(equal, Decl(pipeOperatorConformance.ts, 0, 0))
+>computedReceiver : Symbol(computedReceiver, Decl(pipeOperatorConformance.ts, 35, 12))
+>object : Symbol(object, Decl(pipeOperatorConformance.ts, 30, 5))
+>"method" : Symbol(method, Decl(pipeOperatorConformance.ts, 31, 15))
+
+function isText(value: unknown): value is string { return typeof value === "string"; }
+>isText : Symbol(isText, Decl(pipeOperatorConformance.ts, 50, 45))
+>value : Symbol(value, Decl(pipeOperatorConformance.ts, 52, 16))
+>value : Symbol(value, Decl(pipeOperatorConformance.ts, 52, 16))
+>value : Symbol(value, Decl(pipeOperatorConformance.ts, 52, 16))
+
+function assertText(value: unknown): asserts value is string {
+>assertText : Symbol(assertText, Decl(pipeOperatorConformance.ts, 52, 86))
+>value : Symbol(value, Decl(pipeOperatorConformance.ts, 53, 20))
+>value : Symbol(value, Decl(pipeOperatorConformance.ts, 53, 20))
+
+    if (!isText(value)) throw new Error("expected text");
+>isText : Symbol(isText, Decl(pipeOperatorConformance.ts, 50, 45))
+>value : Symbol(value, Decl(pipeOperatorConformance.ts, 53, 20))
+>Error : Symbol(Error, Decl(lib.es5.d.ts, --, --), Decl(lib.es5.d.ts, --, --), Decl(lib.es2022.error.d.ts, --, --))
+}
+export function predicate(value: string | number) {
+>predicate : Symbol(predicate, Decl(pipeOperatorConformance.ts, 55, 1))
+>value : Symbol(value, Decl(pipeOperatorConformance.ts, 56, 26))
+
+    if (value |> isText) return value.toUpperCase();
+>value : Symbol(value, Decl(pipeOperatorConformance.ts, 56, 26))
+>isText : Symbol(isText, Decl(pipeOperatorConformance.ts, 50, 45))
+>value.toUpperCase : Symbol(String.toUpperCase, Decl(lib.es5.d.ts, --, --))
+>value : Symbol(value, Decl(pipeOperatorConformance.ts, 56, 26))
+>toUpperCase : Symbol(String.toUpperCase, Decl(lib.es5.d.ts, --, --))
+
+    return value.toFixed();
+>value.toFixed : Symbol(Number.toFixed, Decl(lib.es5.d.ts, --, --))
+>value : Symbol(value, Decl(pipeOperatorConformance.ts, 56, 26))
+>toFixed : Symbol(Number.toFixed, Decl(lib.es5.d.ts, --, --))
+}
+export function assertion(value: unknown) {
+>assertion : Symbol(assertion, Decl(pipeOperatorConformance.ts, 59, 1))
+>value : Symbol(value, Decl(pipeOperatorConformance.ts, 60, 26))
+
+    value |> assertText;
+>value : Symbol(value, Decl(pipeOperatorConformance.ts, 60, 26))
+>assertText : Symbol(assertText, Decl(pipeOperatorConformance.ts, 52, 86))
+
+    return value.toUpperCase();
+>value.toUpperCase : Symbol(String.toUpperCase, Decl(lib.es5.d.ts, --, --))
+>value : Symbol(value, Decl(pipeOperatorConformance.ts, 60, 26))
+>toUpperCase : Symbol(String.toUpperCase, Decl(lib.es5.d.ts, --, --))
+}
+equal(predicate("hello"), "HELLO");
+>equal : Symbol(equal, Decl(pipeOperatorConformance.ts, 0, 0))
+>predicate : Symbol(predicate, Decl(pipeOperatorConformance.ts, 55, 1))
+
+equal(predicate(2), "2");
+>equal : Symbol(equal, Decl(pipeOperatorConformance.ts, 0, 0))
+>predicate : Symbol(predicate, Decl(pipeOperatorConformance.ts, 55, 1))
+
+equal(assertion("hello"), "HELLO");
+>equal : Symbol(equal, Decl(pipeOperatorConformance.ts, 0, 0))
+>assertion : Symbol(assertion, Decl(pipeOperatorConformance.ts, 59, 1))
+
+// Captures must survive recursive invocations in the target getter.
+let entered = false;
+>entered : Symbol(entered, Decl(pipeOperatorConformance.ts, 69, 3))
+
+let gets = 0;
+>gets : Symbol(gets, Decl(pipeOperatorConformance.ts, 70, 3))
+
+let inputs = 0;
+>inputs : Symbol(inputs, Decl(pipeOperatorConformance.ts, 71, 3))
+
+let calls = 0;
+>calls : Symbol(calls, Decl(pipeOperatorConformance.ts, 72, 3))
+
+const recursive = {
+>recursive : Symbol(recursive, Decl(pipeOperatorConformance.ts, 73, 5))
+
+    get method() {
+>method : Symbol(method, Decl(pipeOperatorConformance.ts, 73, 19))
+
+        gets++;
+>gets : Symbol(gets, Decl(pipeOperatorConformance.ts, 70, 3))
+
+        if (!entered) {
+>entered : Symbol(entered, Decl(pipeOperatorConformance.ts, 69, 3))
+
+            entered = true;
+>entered : Symbol(entered, Decl(pipeOperatorConformance.ts, 69, 3))
+
+            equal(20 |> recursive.method, 30);
+>equal : Symbol(equal, Decl(pipeOperatorConformance.ts, 0, 0))
+>recursive.method : Symbol(method, Decl(pipeOperatorConformance.ts, 73, 19))
+>recursive : Symbol(recursive, Decl(pipeOperatorConformance.ts, 73, 5))
+>method : Symbol(method, Decl(pipeOperatorConformance.ts, 73, 19))
+        }
+        return function(this: typeof recursive, value: number) {
+>this : Symbol(this, Decl(pipeOperatorConformance.ts, 80, 24))
+>recursive : Symbol(recursive, Decl(pipeOperatorConformance.ts, 73, 5))
+>value : Symbol(value, Decl(pipeOperatorConformance.ts, 80, 47))
+
+            calls++;
+>calls : Symbol(calls, Decl(pipeOperatorConformance.ts, 72, 3))
+
+            equal(this, recursive);
+>equal : Symbol(equal, Decl(pipeOperatorConformance.ts, 0, 0))
+>this : Symbol(this, Decl(pipeOperatorConformance.ts, 80, 24))
+>recursive : Symbol(recursive, Decl(pipeOperatorConformance.ts, 73, 5))
+
+            return value + 10;
+>value : Symbol(value, Decl(pipeOperatorConformance.ts, 80, 47))
+
+        };
+    },
+};
+equal((inputs++, 2) |> recursive.method, 12);
+>equal : Symbol(equal, Decl(pipeOperatorConformance.ts, 0, 0))
+>inputs : Symbol(inputs, Decl(pipeOperatorConformance.ts, 71, 3))
+>recursive.method : Symbol(method, Decl(pipeOperatorConformance.ts, 73, 19))
+>recursive : Symbol(recursive, Decl(pipeOperatorConformance.ts, 73, 5))
+>method : Symbol(method, Decl(pipeOperatorConformance.ts, 73, 19))
+
+equal(inputs, 1);
+>equal : Symbol(equal, Decl(pipeOperatorConformance.ts, 0, 0))
+>inputs : Symbol(inputs, Decl(pipeOperatorConformance.ts, 71, 3))
+
+equal(gets, 2);
+>equal : Symbol(equal, Decl(pipeOperatorConformance.ts, 0, 0))
+>gets : Symbol(gets, Decl(pipeOperatorConformance.ts, 70, 3))
+
+equal(calls, 2);
+>equal : Symbol(equal, Decl(pipeOperatorConformance.ts, 0, 0))
+>calls : Symbol(calls, Decl(pipeOperatorConformance.ts, 72, 3))
+
+export function defaulted(value = 2 |> identity) { return value; }
+>defaulted : Symbol(defaulted, Decl(pipeOperatorConformance.ts, 90, 16))
+>value : Symbol(value, Decl(pipeOperatorConformance.ts, 92, 26))
+>identity : Symbol(identity, Decl(pipeOperatorConformance.ts, 2, 1))
+>value : Symbol(value, Decl(pipeOperatorConformance.ts, 92, 26))
+
+export class Fields {
+>Fields : Symbol(Fields, Decl(pipeOperatorConformance.ts, 92, 66))
+
+    value = 2 |> (n => n + 1);
+>value : Symbol(Fields.value, Decl(pipeOperatorConformance.ts, 93, 21))
+>n : Symbol(n, Decl(pipeOperatorConformance.ts, 94, 18))
+>n : Symbol(n, Decl(pipeOperatorConformance.ts, 94, 18))
+
+    static value = 3 |> (n => n * 2);
+>value : Symbol(Fields.value, Decl(pipeOperatorConformance.ts, 94, 30))
+>n : Symbol(n, Decl(pipeOperatorConformance.ts, 95, 25))
+>n : Symbol(n, Decl(pipeOperatorConformance.ts, 95, 25))
+}
+equal(defaulted(), 2);
+>equal : Symbol(equal, Decl(pipeOperatorConformance.ts, 0, 0))
+>defaulted : Symbol(defaulted, Decl(pipeOperatorConformance.ts, 90, 16))
+
+equal(new Fields().value, 3);
+>equal : Symbol(equal, Decl(pipeOperatorConformance.ts, 0, 0))
+>new Fields().value : Symbol(Fields.value, Decl(pipeOperatorConformance.ts, 93, 21))
+>Fields : Symbol(Fields, Decl(pipeOperatorConformance.ts, 92, 66))
+>value : Symbol(Fields.value, Decl(pipeOperatorConformance.ts, 93, 21))
+
+equal(Fields.value, 6);
+>equal : Symbol(equal, Decl(pipeOperatorConformance.ts, 0, 0))
+>Fields.value : Symbol(Fields.value, Decl(pipeOperatorConformance.ts, 94, 30))
+>Fields : Symbol(Fields, Decl(pipeOperatorConformance.ts, 92, 66))
+>value : Symbol(Fields.value, Decl(pipeOperatorConformance.ts, 94, 30))
+
+export function* yielded(): Generator<string, number, number | ((n: number) => number)> {
+>yielded : Symbol(yielded, Decl(pipeOperatorConformance.ts, 99, 23))
+>Generator : Symbol(Generator, Decl(lib.es2015.generator.d.ts, --, --))
+>n : Symbol(n, Decl(pipeOperatorConformance.ts, 101, 65))
+
+    const input = (yield "input") as number;
+>input : Symbol(input, Decl(pipeOperatorConformance.ts, 102, 9))
+
+    return input |> ((yield "target") as (n: number) => number);
+>input : Symbol(input, Decl(pipeOperatorConformance.ts, 102, 9))
+>n : Symbol(n, Decl(pipeOperatorConformance.ts, 103, 42))
+}
+const generator = yielded();
+>generator : Symbol(generator, Decl(pipeOperatorConformance.ts, 105, 5))
+>yielded : Symbol(yielded, Decl(pipeOperatorConformance.ts, 99, 23))
+
+equal(generator.next().value, "input");
+>equal : Symbol(equal, Decl(pipeOperatorConformance.ts, 0, 0))
+>generator.next().value : Symbol(value, Decl(lib.es2015.iterable.d.ts, --, --), Decl(lib.es2015.iterable.d.ts, --, --))
+>generator.next : Symbol(Generator.next, Decl(lib.es2015.generator.d.ts, --, --))
+>generator : Symbol(generator, Decl(pipeOperatorConformance.ts, 105, 5))
+>next : Symbol(Generator.next, Decl(lib.es2015.generator.d.ts, --, --))
+>value : Symbol(value, Decl(lib.es2015.iterable.d.ts, --, --), Decl(lib.es2015.iterable.d.ts, --, --))
+
+equal(generator.next(3).value, "target");
+>equal : Symbol(equal, Decl(pipeOperatorConformance.ts, 0, 0))
+>generator.next(3).value : Symbol(value, Decl(lib.es2015.iterable.d.ts, --, --), Decl(lib.es2015.iterable.d.ts, --, --))
+>generator.next : Symbol(Generator.next, Decl(lib.es2015.generator.d.ts, --, --))
+>generator : Symbol(generator, Decl(pipeOperatorConformance.ts, 105, 5))
+>next : Symbol(Generator.next, Decl(lib.es2015.generator.d.ts, --, --))
+>value : Symbol(value, Decl(lib.es2015.iterable.d.ts, --, --), Decl(lib.es2015.iterable.d.ts, --, --))
+
+equal(generator.next(n => n * 2).value, 6);
+>equal : Symbol(equal, Decl(pipeOperatorConformance.ts, 0, 0))
+>generator.next(n => n * 2).value : Symbol(value, Decl(lib.es2015.iterable.d.ts, --, --), Decl(lib.es2015.iterable.d.ts, --, --))
+>generator.next : Symbol(Generator.next, Decl(lib.es2015.generator.d.ts, --, --))
+>generator : Symbol(generator, Decl(pipeOperatorConformance.ts, 105, 5))
+>next : Symbol(Generator.next, Decl(lib.es2015.generator.d.ts, --, --))
+>n : Symbol(n, Decl(pipeOperatorConformance.ts, 108, 21))
+>n : Symbol(n, Decl(pipeOperatorConformance.ts, 108, 21))
+>value : Symbol(value, Decl(lib.es2015.iterable.d.ts, --, --), Decl(lib.es2015.iterable.d.ts, --, --))
+
+export async function awaited() {
+>awaited : Symbol(awaited, Decl(pipeOperatorConformance.ts, 108, 43))
+
+    const log: string[] = [];
+>log : Symbol(log, Decl(pipeOperatorConformance.ts, 111, 9))
+
+    const input = async () => { log.push("input"); return 3; };
+>input : Symbol(input, Decl(pipeOperatorConformance.ts, 112, 9))
+>log.push : Symbol(Array.push, Decl(lib.es5.d.ts, --, --))
+>log : Symbol(log, Decl(pipeOperatorConformance.ts, 111, 9))
+>push : Symbol(Array.push, Decl(lib.es5.d.ts, --, --))
+
+    const target = async () => {
+>target : Symbol(target, Decl(pipeOperatorConformance.ts, 113, 9))
+
+        log.push("target");
+>log.push : Symbol(Array.push, Decl(lib.es5.d.ts, --, --))
+>log : Symbol(log, Decl(pipeOperatorConformance.ts, 111, 9))
+>push : Symbol(Array.push, Decl(lib.es5.d.ts, --, --))
+
+        return (n: number) => { log.push("call"); return n * 2; };
+>n : Symbol(n, Decl(pipeOperatorConformance.ts, 115, 16))
+>log.push : Symbol(Array.push, Decl(lib.es5.d.ts, --, --))
+>log : Symbol(log, Decl(pipeOperatorConformance.ts, 111, 9))
+>push : Symbol(Array.push, Decl(lib.es5.d.ts, --, --))
+>n : Symbol(n, Decl(pipeOperatorConformance.ts, 115, 16))
+
+    };
+    const result = (await input()) |> (await target());
+>result : Symbol(result, Decl(pipeOperatorConformance.ts, 117, 9))
+>input : Symbol(input, Decl(pipeOperatorConformance.ts, 112, 9))
+>target : Symbol(target, Decl(pipeOperatorConformance.ts, 113, 9))
+
+    equal(log.join(), "input,target,call");
+>equal : Symbol(equal, Decl(pipeOperatorConformance.ts, 0, 0))
+>log.join : Symbol(Array.join, Decl(lib.es5.d.ts, --, --))
+>log : Symbol(log, Decl(pipeOperatorConformance.ts, 111, 9))
+>join : Symbol(Array.join, Decl(lib.es5.d.ts, --, --))
+
+    return result;
+>result : Symbol(result, Decl(pipeOperatorConformance.ts, 117, 9))
+}
+awaited().then(result => {
+>awaited().then : Symbol(Promise.then, Decl(lib.es5.d.ts, --, --))
+>awaited : Symbol(awaited, Decl(pipeOperatorConformance.ts, 108, 43))
+>then : Symbol(Promise.then, Decl(lib.es5.d.ts, --, --))
+>result : Symbol(result, Decl(pipeOperatorConformance.ts, 121, 15))
+
+    equal(result, 6);
+>equal : Symbol(equal, Decl(pipeOperatorConformance.ts, 0, 0))
+>result : Symbol(result, Decl(pipeOperatorConformance.ts, 121, 15))
+
+    console.log("pipe conformance ok");
+>console.log : Symbol(Console.log, Decl(lib.dom.d.ts, --, --))
+>console : Symbol(console, Decl(lib.dom.d.ts, --, --))
+>log : Symbol(Console.log, Decl(lib.dom.d.ts, --, --))
+
+});
+

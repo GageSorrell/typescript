@@ -44,8 +44,16 @@
     "excludes": [
         "**/.git",
         "**/node_modules",
+        // Beads owns the formatting of its store and generated integrations.
+        "**/.beads",
+        ".codex/hooks.json",
+        ".claude/settings.json",
+        ".cursor/hooks.json",
+        ".agents/skills/beads/agents/openai.yaml",
         "**/*-lock.json",
         "**/testdata",
+        // Pipe syntax is understood by this fork, not dprint's upstream parser.
+        "examples/pipe.ts",
         "_extension/l10n/**",
         "_submodules/**",
         "internal/bundled/libs/**",

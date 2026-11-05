@@ -535,6 +535,9 @@ func (s *Server) dispatchLoop(ctx context.Context) error {
 	for {
 		req, err := s.requestQueue.Get(ctx)
 		if err != nil {
+			if cause := context.Cause(ctx); cause != nil {
+				return cause
+			}
 			return err
 		}
 
@@ -557,7 +560,7 @@ func (s *Server) dispatchLoop(ctx context.Context) error {
 					lspExit(err)
 				}
 			} else if errors.Is(err, io.EOF) {
-				lspExit(nil)
+				lspExit(err)
 			} else {
 				if err := s.sendError(req.ID, err); err != nil {
 					lspExit(err)

@@ -48,7 +48,7 @@ npm run build
 
 `internal/compiler/pipe_emit_test.go` reparses output for every supported target
 from ES2015 through ESNext, in all four input modes. It executes runtime cases
-with Node.js using ES2015 and ESNext output, including ordering, spreads,
+with Node.js using ES2015, ES2022, and ESNext output, including ordering, spreads,
 receivers, exceptions, recursive re-entry, missing/excess arguments, default
 parameters, class fields, `await`, and `yield`. The `pipeOperatorEmit.ts` fixture
 records JavaScript, declarations, types, and symbols at three representative
@@ -64,4 +64,6 @@ After building, pipe programs can now be compiled and run normally:
 The sample fixture exports values and functions; importing its generated module
 allows inspecting the results. Editor integration is documented in
 [PipeEditor.md](PipeEditor.md).
-Fork version labeling and distribution packaging remain delivery work in `.8`.
+The local compiler identifies as `7.0.2-pipe.0`. See
+[PipeDelivery.md](PipeDelivery.md) for the runnable example, SDK archive, and
+CLI/LSP verification. The expanded `.8` still requires Function helper delivery.

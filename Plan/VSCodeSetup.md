@@ -7,7 +7,7 @@ Building VS Code is not required.
 ## Setup
 
 1. Install **TypeScript 7** (`TypeScriptTeam.native-preview`) in a compatible VS Code release.
-2. Build the fork from `E:\TypeScriptFork`:
+2. Build the fork from `C:\Typescript` (or the checkout's actual root):
 
    ```powershell
    npm run build
@@ -18,7 +18,7 @@ Building VS Code is not required.
    ```json
    {
      "js/ts.experimental.useTsgo": true,
-     "js/ts.tsdk.path": "E:/TypeScriptFork/built/local"
+     "js/ts.tsdk.path": "C:/Typescript/built/local"
    }
    ```
 
@@ -37,8 +37,9 @@ alongside the executable; the upstream build task copies them there.
 Use **TypeScript: Select TypeScript Version...** to inspect the selected SDK.
 The extension's output channel is named **TypeScript 7**. The locally built SDK
 may display as `(local)`; use the selected path to distinguish it from the
-extension's bundled compiler. Its command-line version remains `7.0.2` until the
-fork-version delivery task updates it.
+extension's bundled compiler. Its command-line and LSP-reported version is
+`7.0.2-pipe.0`. See [PipeDelivery.md](PipeDelivery.md) for build, example, local SDK
+archive, and executable-level verification instructions.
 
 ## Current boundaries
 

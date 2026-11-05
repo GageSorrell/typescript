@@ -215,3 +215,33 @@ func TestPipeLookaheadNestedSpreads(t *testing.T) {
 		parsetestutil.CheckDiagnostics(t, parsePipeSource(source, core.ScriptKindTS))
 	}
 }
+
+func TestPipeUnrelatedSpreadRecovery(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		source string
+		codes  []int32
+	}{
+		{"<X a={...a} />;", []int32{1109, 1003}},
+		{"<div>stuff</div {...props}>;", []int32{1005, 1128, 1109, 1109}},
+		{"<a .../*hai*/asdf/>;", []int32{1003}},
+		{"...rest;", []int32{1128}},
+	}
+	for _, test := range tests {
+		t.Run(test.source, func(t *testing.T) {
+			t.Parallel()
+			file := parsePipeSource(test.source, core.ScriptKindTSX)
+			var codes []int32
+			for _, diagnostic := range file.Diagnostics() {
+				codes = append(codes, diagnostic.Code())
+			}
+			assert.DeepEqual(t, codes, test.codes)
+			var visit ast.Visitor
+			visit = func(node *ast.Node) bool {
+				assert.Assert(t, !ast.IsSpreadElement(node), "non-pipe recovery introduced an unpacked argument vector")
+				return node.ForEachChild(visit)
+			}
+			visit(file.AsNode())
+		})
+	}
+}

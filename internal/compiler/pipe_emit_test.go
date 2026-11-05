@@ -1,7 +1,9 @@
 package compiler_test
 
 import (
+	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -9,14 +11,21 @@ import (
 	"github.com/microsoft/typescript-go/internal/bundled"
 	"github.com/microsoft/typescript-go/internal/compiler"
 	"github.com/microsoft/typescript-go/internal/core"
+	"github.com/microsoft/typescript-go/internal/diagnosticwriter"
 	"github.com/microsoft/typescript-go/internal/json"
 	"github.com/microsoft/typescript-go/internal/parser"
+	"github.com/microsoft/typescript-go/internal/repo"
 	"github.com/microsoft/typescript-go/internal/sourcemap"
 	"github.com/microsoft/typescript-go/internal/tsoptions"
 	"github.com/microsoft/typescript-go/internal/vfs/vfstest"
 )
 
 func emitPipe(t *testing.T, source, extension string, target core.ScriptTarget) map[string]string {
+	t.Helper()
+	return emitPipeProgram(t, source, extension, target, false)
+}
+
+func emitPipeProgram(t *testing.T, source, extension string, target core.ScriptTarget, check bool) map[string]string {
 	t.Helper()
 	name := "/pipe." + extension
 	fs := bundled.WrapFS(vfstest.FromMap(map[string]string{name: source}, true))
@@ -26,6 +35,10 @@ func emitPipe(t *testing.T, source, extension string, target core.ScriptTarget) 
 		AllowJs: core.TSTrue, OutDir: "/out", SourceMap: core.TSTrue,
 		Declaration: core.TSTrue, DeclarationMap: core.TSTrue,
 		Jsx: core.JsxEmitReact,
+	}
+	if check {
+		options.NoCheck = core.TSFalse
+		options.Strict = core.TSTrue
 	}
 	p := compiler.NewProgram(compiler.ProgramOptions{
 		Config: &tsoptions.ParsedCommandLine{ParsedConfig: &core.ParsedOptions{FileNames: []string{name}, CompilerOptions: options}},
@@ -39,6 +52,14 @@ func emitPipe(t *testing.T, source, extension string, target core.ScriptTarget) 
 	var visit ast.Visitor
 	visit = func(node *ast.Node) bool { parents[node] = node.Parent; return node.ForEachChild(visit) }
 	visit(file.AsNode())
+	if check {
+		diagnostics := append(p.GetGlobalDiagnostics(t.Context()), p.GetSemanticDiagnostics(t.Context(), file)...)
+		if len(diagnostics) != 0 {
+			var message strings.Builder
+			diagnosticwriter.WriteFormatDiagnostics(&message, diagnosticwriter.FromASTDiagnostics(diagnostics), &diagnosticwriter.FormattingOptions{NewLine: "\n"})
+			t.Fatalf("conformance diagnostics:\n%s", message.String())
+		}
+	}
 	outputs := map[string]string{}
 	result := p.Emit(t.Context(), compiler.EmitOptions{WriteFile: func(name, text string, data *compiler.WriteFileData) error {
 		outputs[name] = text
@@ -119,13 +140,18 @@ func TestPipeEmitRuntime(t *testing.T) {
 		"optional await and yield":                    `const obj = { n: 10, fn(x) { return this.n + x; } }; eq(2 |> obj?.[await Promise.resolve("fn")], 12); function* run() { return 2 |> obj?.[yield "key"]; } const it = run(); eq(it.next().value, "key"); eq(it.next("fn").value, 12);`,
 		"optional default and field":                  `const obj = { n: 10, fn(x) { return this.n + x; } }; function run(value = 2 |> obj?.["fn"]) { return value; } class C { value = 3 |> obj?.["fn"]; } eq(run(), 12); eq(new C().value, 13);`,
 		"optional recursive key":                      `let entered = false; const obj = { n: 10, fn(x) { return this.n + x; } }; function run(x) { return x |> obj?.[(entered ? "fn" : (entered = true, eq(run(20), 30), "fn"))]; } eq(run(2), 12);`,
-		"nested pipes and spread errors":              `let called = false; const xs = { *[Symbol.iterator]() { yield 1; throw "iterator"; } }; try { ...[...xs] |> (() => { called = true; return x => x; })(); } catch (e) { eq(e, "iterator"); } eq(called, false); eq(...[1 |> (n => n + 1), ...[2, 3]] |> ((...ns) => ns.join()), "2,2,3");`,
+		"nested pipes and spread errors":              `let called = false, caught = false; const xs = { *[Symbol.iterator]() { yield 1; throw "iterator"; } }; try { ...[...xs] |> (() => { called = true; return x => x; })(); } catch (e) { eq(e, "iterator"); caught = true; } eq(caught, true); eq(called, false); eq(...[1 |> (n => n + 1), ...[2, 3]] |> ((...ns) => ns.join()), "2,2,3");`,
 		"no implicit await":                           `const promise = Promise.resolve(2); eq(promise |> (value => value), promise);`,
+		"each operand once":                           `const log = []; let inputs = 0, receivers = 0, keys = 0, gets = 0, calls = 0; const obj = { get fn() { gets++; log.push("get"); return function(a, b) { calls++; eq(this, obj); log.push("call"); return a + b; }; } }; const input = n => { inputs++; log.push("input" + n); return n; }; const receiver = () => { receivers++; log.push("receiver"); return obj; }; const key = () => { keys++; log.push("key"); return "fn"; }; eq(...[input(1), input(2)] |> receiver()[key()], 3); eq(log.join(), "input1,input2,receiver,key,get,call"); eq(inputs, 2); eq(receivers, 1); eq(keys, 1); eq(gets, 1); eq(calls, 1);`,
+		"caught invocation failures":                  `const log = []; for (const stage of ["input", "target", "call"]) { let caught = false; const input = () => { log.push("input"); if (stage === "input") throw stage; return 1; }; const target = () => { log.push("target"); if (stage === "target") throw stage; return n => { log.push("call"); throw stage; }; }; try { input() |> target() |> (n => { throw new Error("next stage ran"); }); } catch (e) { eq(e, stage); caught = true; } eq(caught, true); } eq(log.join(), "input,input,target,input,target,call");`,
+		"proxy receiver":                              `let applied = 0; const receiver = { n: 10, fn: new Proxy(function(x) { return this.n + x; }, { apply(target, thisArg, args) { applied++; eq(thisArg, receiver); eq(args.join(), "2"); return Reflect.apply(target, thisArg, args); } }) }; eq(2 |> receiver.fn, 12); eq(applied, 1);`,
+		"destructuring defaults":                      `function run({ value = 2 |> (n => n + 1) } = {}) { return value; } eq(run(), 3); eq(run({ value: 9 }), 9); const { value = ...[...[2, 3]] |> ((a, b) => a + b) } = {}; eq(value, 5);`,
+		"ordinary call behavior":                      `const log = []; const target = () => { log.push("target"); return (...args) => { log.push("call"); return args.join(); }; }; const input = () => { log.push("input"); return 2; }; eq(target()(input()), "2"); eq(log.join(), "target,input,call"); log.length = 0; eq(input() |> target(), "2"); eq(log.join(), "input,target,call"); const values = [3, 4]; eq(((a, b) => a + b)(...values), 7); eq([...values, 5].join(), "3,4,5"); eq((2 | 1) > 0, true);`,
 	}
 	for name, source := range tests {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
-			for _, target := range []core.ScriptTarget{core.ScriptTargetES2015, core.ScriptTargetESNext} {
+			for _, target := range []core.ScriptTarget{core.ScriptTargetES2015, core.ScriptTargetES2022, core.ScriptTargetESNext} {
 				t.Run(target.String(), func(t *testing.T) {
 					t.Parallel()
 					program := `function eq(actual, expected) { if (!Object.is(actual, expected)) throw new Error(String(actual) + " != " + String(expected)); } async function main() { ` + source + ` } main().then(() => console.log("pipe runtime ok"), e => { console.error(e); process.exitCode = 1; });`
@@ -135,6 +161,29 @@ func TestPipeEmitRuntime(t *testing.T) {
 						t.Fatalf("runtime failed: %v\n%s\n%s", err, output, outputs["/out/pipe.js"])
 					}
 				})
+			}
+		})
+	}
+}
+
+// The same source records compiler baselines and runs here with strict checking
+// enabled, so inferred types and executable behavior cannot drift independently.
+func TestPipeConformanceRuntime(t *testing.T) {
+	t.Parallel()
+	if _, err := exec.LookPath("node"); err != nil {
+		t.Fatal("Node.js is required for pipe conformance runtime tests")
+	}
+	source, readErr := os.ReadFile(filepath.Join(repo.TestDataPath(), "tests", "cases", "compiler", "pipeOperatorConformance.ts"))
+	if readErr != nil {
+		t.Fatal(readErr)
+	}
+	for _, target := range []core.ScriptTarget{core.ScriptTargetES2015, core.ScriptTargetES2022, core.ScriptTargetESNext} {
+		t.Run(target.String(), func(t *testing.T) {
+			t.Parallel()
+			outputs := emitPipeProgram(t, string(source), "ts", target, true)
+			output, err := exec.CommandContext(t.Context(), "node", "--input-type=module", "-e", outputs["/out/pipe.js"]).CombinedOutput()
+			if err != nil || strings.TrimSpace(string(output)) != "pipe conformance ok" {
+				t.Fatalf("conformance runtime failed: %v\n%s\n%s", err, output, outputs["/out/pipe.js"])
 			}
 		})
 	}

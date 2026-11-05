@@ -1,5 +1,12 @@
 # TypeScript 7
 
+This checkout is the local **7.0.2-pipe.0** fork with the `|>` operator.
+See [Windows compiler delivery](Plan/PipeDelivery.md) for building the fork,
+running examples, verifying the native CLI/LSP, and creating a local SDK archive.
+The remaining sections describe upstream TypeScript; the upstream npm package
+named below contains Microsoft's build. Global Function helpers are planned in
+[FunctionHelpers.md](Plan/FunctionHelpers.md) and tracked separately in Beads.
+
 [Not sure what this is? Read the announcement post!](https://devblogs.microsoft.com/typescript/typescript-native-port/)
 
 ## Preview

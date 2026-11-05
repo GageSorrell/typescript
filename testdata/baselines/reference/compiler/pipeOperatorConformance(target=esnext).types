@@ -1,0 +1,811 @@
+//// [tests/cases/compiler/pipeOperatorConformance.ts] ////
+
+=== pipeOperatorConformance.ts ===
+function equal(actual: unknown, expected: unknown): void {
+>equal : (actual: unknown, expected: unknown) => void
+>actual : unknown
+>expected : unknown
+
+    if (!Object.is(actual, expected)) throw new Error(`${actual} != ${expected}`);
+>!Object.is(actual, expected) : boolean
+>Object.is(actual, expected) : boolean
+>Object.is : (value1: any, value2: any) => boolean
+>Object : ObjectConstructor
+>is : (value1: any, value2: any) => boolean
+>actual : unknown
+>expected : unknown
+>new Error(`${actual} != ${expected}`) : Error
+>Error : ErrorConstructor
+>`${actual} != ${expected}` : string
+>actual : unknown
+>expected : unknown
+}
+
+function identity<T>(value: T): T { return value; }
+>identity : <T>(value: T) => T
+>value : T
+>value : T
+
+function box<T>(value: T): { value: T } { return { value }; }
+>box : <T>(value: T) => { value: T; }
+>value : T
+>value : T
+>{ value } : { value: T; }
+>value : T
+
+function select(value: number): number;
+>select : { (value: number): number; (value: string): string; }
+>value : number
+
+function select(value: string): string;
+>select : { (value: number): number; (value: string): string; }
+>value : string
+
+function select(value: number | string) { return value; }
+>select : { (value: number): number; (value: string): string; }
+>value : string | number
+>value : string | number
+
+function pair(count: number, text: string) { return { count, text }; }
+>pair : (count: number, text: string) => { count: number; text: string; }
+>count : number
+>text : string
+>{ count, text } : { count: number; text: string; }
+>count : number
+>text : string
+
+function sum(a: number = 7, b: number = 8) { return a + b; }
+>sum : (a?: number, b?: number) => number
+>a : number
+>7 : 7
+>b : number
+>8 : 8
+>a + b : number
+>a : number
+>b : number
+
+function join(head: string, ...tail: number[]) { return head + tail.join(","); }
+>join : (head: string, ...tail: number[]) => string
+>head : string
+>tail : number[]
+>head + tail.join(",") : string
+>head : string
+>tail.join(",") : string
+>tail.join : (separator?: string) => string
+>tail : number[]
+>join : (separator?: string) => string
+>"," : ","
+
+function callback(fn: (value: string) => number, value: string) { return fn(value); }
+>callback : (fn: (value: string) => number, value: string) => number
+>fn : (value: string) => number
+>value : string
+>value : string
+>fn(value) : number
+>fn : (value: string) => number
+>value : string
+
+function capture<T extends unknown[]>(...args: T): T { return args; }
+>capture : <T extends unknown[]>(...args: T) => T
+>args : T
+>args : T
+
+export const chain = "hello" |> (value => value.length) |> identity |> box;
+>chain : { value: number; }
+>"hello" |> (value => value.length) |> identity |> box : { value: number; }
+>"hello" |> (value => value.length) |> identity : number
+>"hello" |> (value => value.length) : number
+>"hello" : "hello"
+>(value => value.length) : (value: string) => number
+>value => value.length : (value: string) => number
+>value : string
+>value.length : number
+>value : string
+>length : number
+>identity : <T>(value: T) => T
+>box : <T>(value: T) => { value: T; }
+
+export const numberOverload = 1 |> select;
+>numberOverload : number
+>1 |> select : number
+>1 : 1
+>select : { (value: number): number; (value: string): string; }
+
+export const stringOverload = "x" |> select;
+>stringOverload : string
+>"x" |> select : string
+>"x" : "x"
+>select : { (value: number): number; (value: string): string; }
+
+export const explicit = ...[2, "two"] |> pair;
+>explicit : { count: number; text: string; }
+>...[2, "two"] |> pair : { count: number; text: string; }
+>...[2, "two"] : string | number
+>[2, "two"] : (string | number)[]
+>2 : 2
+>"two" : "two"
+>pair : (count: number, text: string) => { count: number; text: string; }
+
+const tuple = [3, "three"] as const;
+>tuple : readonly [3, "three"]
+>[3, "three"] as const : readonly [3, "three"]
+>[3, "three"] : readonly [3, "three"]
+>3 : 3
+>"three" : "three"
+
+export const fixedTuple = ...[...tuple] |> pair;
+>fixedTuple : { count: number; text: string; }
+>...[...tuple] |> pair : { count: number; text: string; }
+>...[...tuple] : "three" | 3
+>[...tuple] : ("three" | 3)[]
+>...tuple : "three" | 3
+>tuple : readonly [3, "three"]
+>pair : (count: number, text: string) => { count: number; text: string; }
+
+export const genericTuple = ...[1, "x", true] |> capture;
+>genericTuple : [number, string, boolean]
+>...[1, "x", true] |> capture : [number, string, boolean]
+>...[1, "x", true] : string | number | true
+>[1, "x", true] : (string | number | true)[]
+>1 : 1
+>"x" : "x"
+>true : true
+>capture : <T extends unknown[]>(...args: T) => T
+
+export const arrayValue = [1, 2] |> (values => values.length);
+>arrayValue : number
+>[1, 2] |> (values => values.length) : number
+>[1, 2] : number[]
+>1 : 1
+>2 : 2
+>(values => values.length) : (values: number[]) => number
+>values => values.length : (values: number[]) => number
+>values : number[]
+>values.length : number
+>values : number[]
+>length : number
+
+const values = [1, 2, 99];
+>values : number[]
+>[1, 2, 99] : number[]
+>1 : 1
+>2 : 2
+>99 : 99
+
+const empty: number[] = [];
+>empty : number[]
+>[] : never[]
+
+export const arrayArguments = ...[...values] |> sum;
+>arrayArguments : number
+>...[...values] |> sum : number
+>...[...values] : number
+>[...values] : number[]
+>...values : number
+>values : number[]
+>sum : (a?: number, b?: number) => number
+
+export const missingArguments = ...[...empty] |> sum;
+>missingArguments : number
+>...[...empty] |> sum : number
+>...[...empty] : number
+>[...empty] : number[]
+>...empty : number
+>empty : number[]
+>sum : (a?: number, b?: number) => number
+
+export const optionalArgument = ...[1] |> sum;
+>optionalArgument : number
+>...[1] |> sum : number
+>...[1] : number
+>[1] : number[]
+>1 : 1
+>sum : (a?: number, b?: number) => number
+
+export const restArguments = ...["n=", ...values] |> join;
+>restArguments : string
+>...["n=", ...values] |> join : string
+>...["n=", ...values] : string | number
+>["n=", ...values] : (string | number)[]
+>"n=" : "n="
+>...values : number
+>values : number[]
+>join : (head: string, ...tail: number[]) => string
+
+export const contextualCallback = ...[value => value.length, "hello"] |> callback;
+>contextualCallback : number
+>...[value => value.length, "hello"] |> callback : number
+>...[value => value.length, "hello"] : string | ((value: string) => number)
+>[value => value.length, "hello"] : (string | ((value: string) => number))[]
+>value => value.length : (value: string) => number
+>value : string
+>value.length : number
+>value : string
+>length : number
+>"hello" : "hello"
+>callback : (fn: (value: string) => number, value: string) => number
+
+const object = {
+>object : { offset: number; method(this: { offset: number; }, n: number): number; }
+>{    offset: 10,    method(this: { offset: number }, n: number) { return this.offset + n; },} : { offset: number; method(this: { offset: number; }, n: number): number; }
+
+    offset: 10,
+>offset : number
+>10 : 10
+
+    method(this: { offset: number }, n: number) { return this.offset + n; },
+>method : (this: { offset: number; }, n: number) => number
+>this : { offset: number; }
+>offset : number
+>n : number
+>this.offset + n : number
+>this.offset : number
+>this : { offset: number; }
+>offset : number
+>n : number
+
+};
+export const receiver = 2 |> object.method;
+>receiver : number
+>2 |> object.method : number
+>2 : 2
+>object.method : (this: { offset: number; }, n: number) => number
+>object : { offset: number; method(this: { offset: number; }, n: number): number; }
+>method : (this: { offset: number; }, n: number) => number
+
+export const computedReceiver = 3 |> object["method"];
+>computedReceiver : number
+>3 |> object["method"] : number
+>3 : 3
+>object["method"] : (this: { offset: number; }, n: number) => number
+>object : { offset: number; method(this: { offset: number; }, n: number): number; }
+>"method" : "method"
+
+equal(chain.value, box(identity("hello".length)).value);
+>equal(chain.value, box(identity("hello".length)).value) : void
+>equal : (actual: unknown, expected: unknown) => void
+>chain.value : number
+>chain : { value: number; }
+>value : number
+>box(identity("hello".length)).value : number
+>box(identity("hello".length)) : { value: number; }
+>box : <T>(value: T) => { value: T; }
+>identity("hello".length) : number
+>identity : <T>(value: T) => T
+>"hello".length : number
+>"hello" : "hello"
+>length : number
+>value : number
+
+equal(numberOverload, select(1));
+>equal(numberOverload, select(1)) : void
+>equal : (actual: unknown, expected: unknown) => void
+>numberOverload : number
+>select(1) : number
+>select : { (value: number): number; (value: string): string; }
+>1 : 1
+
+equal(stringOverload, select("x"));
+>equal(stringOverload, select("x")) : void
+>equal : (actual: unknown, expected: unknown) => void
+>stringOverload : string
+>select("x") : string
+>select : { (value: number): number; (value: string): string; }
+>"x" : "x"
+
+equal(explicit.text, pair(2, "two").text);
+>equal(explicit.text, pair(2, "two").text) : void
+>equal : (actual: unknown, expected: unknown) => void
+>explicit.text : string
+>explicit : { count: number; text: string; }
+>text : string
+>pair(2, "two").text : string
+>pair(2, "two") : { count: number; text: string; }
+>pair : (count: number, text: string) => { count: number; text: string; }
+>2 : 2
+>"two" : "two"
+>text : string
+
+equal(fixedTuple.count, pair(...tuple).count);
+>equal(fixedTuple.count, pair(...tuple).count) : void
+>equal : (actual: unknown, expected: unknown) => void
+>fixedTuple.count : number
+>fixedTuple : { count: number; text: string; }
+>count : number
+>pair(...tuple).count : number
+>pair(...tuple) : { count: number; text: string; }
+>pair : (count: number, text: string) => { count: number; text: string; }
+>...tuple : "three" | 3
+>tuple : readonly [3, "three"]
+>count : number
+
+equal(genericTuple.join(), capture(1, "x", true).join());
+>equal(genericTuple.join(), capture(1, "x", true).join()) : void
+>equal : (actual: unknown, expected: unknown) => void
+>genericTuple.join() : string
+>genericTuple.join : (separator?: string) => string
+>genericTuple : [number, string, boolean]
+>join : (separator?: string) => string
+>capture(1, "x", true).join() : string
+>capture(1, "x", true).join : (separator?: string) => string
+>capture(1, "x", true) : [number, string, boolean]
+>capture : <T extends unknown[]>(...args: T) => T
+>1 : 1
+>"x" : "x"
+>true : true
+>join : (separator?: string) => string
+
+equal(arrayValue, [1, 2].length);
+>equal(arrayValue, [1, 2].length) : void
+>equal : (actual: unknown, expected: unknown) => void
+>arrayValue : number
+>[1, 2].length : number
+>[1, 2] : number[]
+>1 : 1
+>2 : 2
+>length : number
+
+equal(arrayArguments, sum(values[0], values[1]));
+>equal(arrayArguments, sum(values[0], values[1])) : void
+>equal : (actual: unknown, expected: unknown) => void
+>arrayArguments : number
+>sum(values[0], values[1]) : number
+>sum : (a?: number, b?: number) => number
+>values[0] : number
+>values : number[]
+>0 : 0
+>values[1] : number
+>values : number[]
+>1 : 1
+
+equal(missingArguments, sum());
+>equal(missingArguments, sum()) : void
+>equal : (actual: unknown, expected: unknown) => void
+>missingArguments : number
+>sum() : number
+>sum : (a?: number, b?: number) => number
+
+equal(optionalArgument, sum(1));
+>equal(optionalArgument, sum(1)) : void
+>equal : (actual: unknown, expected: unknown) => void
+>optionalArgument : number
+>sum(1) : number
+>sum : (a?: number, b?: number) => number
+>1 : 1
+
+equal(restArguments, join("n=", ...values));
+>equal(restArguments, join("n=", ...values)) : void
+>equal : (actual: unknown, expected: unknown) => void
+>restArguments : string
+>join("n=", ...values) : string
+>join : (head: string, ...tail: number[]) => string
+>"n=" : "n="
+>...values : number
+>values : number[]
+
+equal(contextualCallback, callback(value => value.length, "hello"));
+>equal(contextualCallback, callback(value => value.length, "hello")) : void
+>equal : (actual: unknown, expected: unknown) => void
+>contextualCallback : number
+>callback(value => value.length, "hello") : number
+>callback : (fn: (value: string) => number, value: string) => number
+>value => value.length : (value: string) => number
+>value : string
+>value.length : number
+>value : string
+>length : number
+>"hello" : "hello"
+
+equal(receiver, object.method(2));
+>equal(receiver, object.method(2)) : void
+>equal : (actual: unknown, expected: unknown) => void
+>receiver : number
+>object.method(2) : number
+>object.method : (this: { offset: number; }, n: number) => number
+>object : { offset: number; method(this: { offset: number; }, n: number): number; }
+>method : (this: { offset: number; }, n: number) => number
+>2 : 2
+
+equal(computedReceiver, object["method"](3));
+>equal(computedReceiver, object["method"](3)) : void
+>equal : (actual: unknown, expected: unknown) => void
+>computedReceiver : number
+>object["method"](3) : number
+>object["method"] : (this: { offset: number; }, n: number) => number
+>object : { offset: number; method(this: { offset: number; }, n: number): number; }
+>"method" : "method"
+>3 : 3
+
+function isText(value: unknown): value is string { return typeof value === "string"; }
+>isText : (value: unknown) => value is string
+>value : unknown
+>typeof value === "string" : boolean
+>typeof value : "bigint" | "boolean" | "function" | "number" | "object" | "string" | "symbol" | "undefined"
+>value : unknown
+>"string" : "string"
+
+function assertText(value: unknown): asserts value is string {
+>assertText : (value: unknown) => asserts value is string
+>value : unknown
+
+    if (!isText(value)) throw new Error("expected text");
+>!isText(value) : boolean
+>isText(value) : boolean
+>isText : (value: unknown) => value is string
+>value : unknown
+>new Error("expected text") : Error
+>Error : ErrorConstructor
+>"expected text" : "expected text"
+}
+export function predicate(value: string | number) {
+>predicate : (value: string | number) => string
+>value : string | number
+
+    if (value |> isText) return value.toUpperCase();
+>value |> isText : boolean
+>value : string | number
+>isText : (value: unknown) => value is string
+>value.toUpperCase() : string
+>value.toUpperCase : () => string
+>value : string
+>toUpperCase : () => string
+
+    return value.toFixed();
+>value.toFixed() : string
+>value.toFixed : (fractionDigits?: number) => string
+>value : number
+>toFixed : (fractionDigits?: number) => string
+}
+export function assertion(value: unknown) {
+>assertion : (value: unknown) => string
+>value : unknown
+
+    value |> assertText;
+>value |> assertText : void
+>value : unknown
+>assertText : (value: unknown) => asserts value is string
+
+    return value.toUpperCase();
+>value.toUpperCase() : string
+>value.toUpperCase : () => string
+>value : string
+>toUpperCase : () => string
+}
+equal(predicate("hello"), "HELLO");
+>equal(predicate("hello"), "HELLO") : void
+>equal : (actual: unknown, expected: unknown) => void
+>predicate("hello") : string
+>predicate : (value: string | number) => string
+>"hello" : "hello"
+>"HELLO" : "HELLO"
+
+equal(predicate(2), "2");
+>equal(predicate(2), "2") : void
+>equal : (actual: unknown, expected: unknown) => void
+>predicate(2) : string
+>predicate : (value: string | number) => string
+>2 : 2
+>"2" : "2"
+
+equal(assertion("hello"), "HELLO");
+>equal(assertion("hello"), "HELLO") : void
+>equal : (actual: unknown, expected: unknown) => void
+>assertion("hello") : string
+>assertion : (value: unknown) => string
+>"hello" : "hello"
+>"HELLO" : "HELLO"
+
+// Captures must survive recursive invocations in the target getter.
+let entered = false;
+>entered : boolean
+>false : false
+
+let gets = 0;
+>gets : number
+>0 : 0
+
+let inputs = 0;
+>inputs : number
+>0 : 0
+
+let calls = 0;
+>calls : number
+>0 : 0
+
+const recursive = {
+>recursive : { readonly method: (this: typeof recursive, value: number) => number; }
+>{    get method() {        gets++;        if (!entered) {            entered = true;            equal(20 |> recursive.method, 30);        }        return function(this: typeof recursive, value: number) {            calls++;            equal(this, recursive);            return value + 10;        };    },} : { readonly method: (this: typeof recursive, value: number) => number; }
+
+    get method() {
+>method : (this: typeof recursive, value: number) => number
+
+        gets++;
+>gets++ : number
+>gets : number
+
+        if (!entered) {
+>!entered : boolean
+>entered : boolean
+
+            entered = true;
+>entered = true : true
+>entered : boolean
+>true : true
+
+            equal(20 |> recursive.method, 30);
+>equal(20 |> recursive.method, 30) : void
+>equal : (actual: unknown, expected: unknown) => void
+>20 |> recursive.method : number
+>20 : 20
+>recursive.method : (this: typeof recursive, value: number) => number
+>recursive : { readonly method: (this: typeof recursive, value: number) => number; }
+>method : (this: typeof recursive, value: number) => number
+>30 : 30
+        }
+        return function(this: typeof recursive, value: number) {
+>function(this: typeof recursive, value: number) {            calls++;            equal(this, recursive);            return value + 10;        } : (this: typeof recursive, value: number) => number
+>this : { readonly method: (this: typeof recursive, value: number) => number; }
+>recursive : { readonly method: (this: typeof recursive, value: number) => number; }
+>value : number
+
+            calls++;
+>calls++ : number
+>calls : number
+
+            equal(this, recursive);
+>equal(this, recursive) : void
+>equal : (actual: unknown, expected: unknown) => void
+>this : { readonly method: (this: typeof recursive, value: number) => number; }
+>recursive : { readonly method: (this: typeof recursive, value: number) => number; }
+
+            return value + 10;
+>value + 10 : number
+>value : number
+>10 : 10
+
+        };
+    },
+};
+equal((inputs++, 2) |> recursive.method, 12);
+>equal((inputs++, 2) |> recursive.method, 12) : void
+>equal : (actual: unknown, expected: unknown) => void
+>(inputs++, 2) |> recursive.method : number
+>(inputs++, 2) : 2
+>inputs++, 2 : 2
+>inputs++ : number
+>inputs : number
+>2 : 2
+>recursive.method : (this: typeof recursive, value: number) => number
+>recursive : { readonly method: (this: typeof recursive, value: number) => number; }
+>method : (this: typeof recursive, value: number) => number
+>12 : 12
+
+equal(inputs, 1);
+>equal(inputs, 1) : void
+>equal : (actual: unknown, expected: unknown) => void
+>inputs : number
+>1 : 1
+
+equal(gets, 2);
+>equal(gets, 2) : void
+>equal : (actual: unknown, expected: unknown) => void
+>gets : number
+>2 : 2
+
+equal(calls, 2);
+>equal(calls, 2) : void
+>equal : (actual: unknown, expected: unknown) => void
+>calls : number
+>2 : 2
+
+export function defaulted(value = 2 |> identity) { return value; }
+>defaulted : (value?: number) => number
+>value : number
+>2 |> identity : 2
+>2 : 2
+>identity : <T>(value: T) => T
+>value : number
+
+export class Fields {
+>Fields : Fields
+
+    value = 2 |> (n => n + 1);
+>value : number
+>2 |> (n => n + 1) : number
+>2 : 2
+>(n => n + 1) : (n: number) => number
+>n => n + 1 : (n: number) => number
+>n : number
+>n + 1 : number
+>n : number
+>1 : 1
+
+    static value = 3 |> (n => n * 2);
+>value : number
+>3 |> (n => n * 2) : number
+>3 : 3
+>(n => n * 2) : (n: number) => number
+>n => n * 2 : (n: number) => number
+>n : number
+>n * 2 : number
+>n : number
+>2 : 2
+}
+equal(defaulted(), 2);
+>equal(defaulted(), 2) : void
+>equal : (actual: unknown, expected: unknown) => void
+>defaulted() : number
+>defaulted : (value?: number) => number
+>2 : 2
+
+equal(new Fields().value, 3);
+>equal(new Fields().value, 3) : void
+>equal : (actual: unknown, expected: unknown) => void
+>new Fields().value : number
+>new Fields() : Fields
+>Fields : typeof Fields
+>value : number
+>3 : 3
+
+equal(Fields.value, 6);
+>equal(Fields.value, 6) : void
+>equal : (actual: unknown, expected: unknown) => void
+>Fields.value : number
+>Fields : typeof Fields
+>value : number
+>6 : 6
+
+export function* yielded(): Generator<string, number, number | ((n: number) => number)> {
+>yielded : () => Generator<string, number, number | ((n: number) => number)>
+>n : number
+
+    const input = (yield "input") as number;
+>input : number
+>(yield "input") as number : number
+>(yield "input") : number | ((n: number) => number)
+>yield "input" : number | ((n: number) => number)
+>"input" : "input"
+
+    return input |> ((yield "target") as (n: number) => number);
+>input |> ((yield "target") as (n: number) => number) : number
+>input : number
+>((yield "target") as (n: number) => number) : (n: number) => number
+>(yield "target") as (n: number) => number : (n: number) => number
+>(yield "target") : number | ((n: number) => number)
+>yield "target" : number | ((n: number) => number)
+>"target" : "target"
+>n : number
+}
+const generator = yielded();
+>generator : Generator<string, number, number | ((n: number) => number)>
+>yielded() : Generator<string, number, number | ((n: number) => number)>
+>yielded : () => Generator<string, number, number | ((n: number) => number)>
+
+equal(generator.next().value, "input");
+>equal(generator.next().value, "input") : void
+>equal : (actual: unknown, expected: unknown) => void
+>generator.next().value : string | number
+>generator.next() : IteratorResult<string, number>
+>generator.next : (...[value]: [] | [number | ((n: number) => number)]) => IteratorResult<string, number>
+>generator : Generator<string, number, number | ((n: number) => number)>
+>next : (...[value]: [] | [number | ((n: number) => number)]) => IteratorResult<string, number>
+>value : string | number
+>"input" : "input"
+
+equal(generator.next(3).value, "target");
+>equal(generator.next(3).value, "target") : void
+>equal : (actual: unknown, expected: unknown) => void
+>generator.next(3).value : string | number
+>generator.next(3) : IteratorResult<string, number>
+>generator.next : (...[value]: [] | [number | ((n: number) => number)]) => IteratorResult<string, number>
+>generator : Generator<string, number, number | ((n: number) => number)>
+>next : (...[value]: [] | [number | ((n: number) => number)]) => IteratorResult<string, number>
+>3 : 3
+>value : string | number
+>"target" : "target"
+
+equal(generator.next(n => n * 2).value, 6);
+>equal(generator.next(n => n * 2).value, 6) : void
+>equal : (actual: unknown, expected: unknown) => void
+>generator.next(n => n * 2).value : string | number
+>generator.next(n => n * 2) : IteratorResult<string, number>
+>generator.next : (...[value]: [] | [number | ((n: number) => number)]) => IteratorResult<string, number>
+>generator : Generator<string, number, number | ((n: number) => number)>
+>next : (...[value]: [] | [number | ((n: number) => number)]) => IteratorResult<string, number>
+>n => n * 2 : (n: number) => number
+>n : number
+>n * 2 : number
+>n : number
+>2 : 2
+>value : string | number
+>6 : 6
+
+export async function awaited() {
+>awaited : () => Promise<number>
+
+    const log: string[] = [];
+>log : string[]
+>[] : never[]
+
+    const input = async () => { log.push("input"); return 3; };
+>input : () => Promise<number>
+>async () => { log.push("input"); return 3; } : () => Promise<number>
+>log.push("input") : number
+>log.push : (...items: string[]) => number
+>log : string[]
+>push : (...items: string[]) => number
+>"input" : "input"
+>3 : 3
+
+    const target = async () => {
+>target : () => Promise<(n: number) => number>
+>async () => {        log.push("target");        return (n: number) => { log.push("call"); return n * 2; };    } : () => Promise<(n: number) => number>
+
+        log.push("target");
+>log.push("target") : number
+>log.push : (...items: string[]) => number
+>log : string[]
+>push : (...items: string[]) => number
+>"target" : "target"
+
+        return (n: number) => { log.push("call"); return n * 2; };
+>(n: number) => { log.push("call"); return n * 2; } : (n: number) => number
+>n : number
+>log.push("call") : number
+>log.push : (...items: string[]) => number
+>log : string[]
+>push : (...items: string[]) => number
+>"call" : "call"
+>n * 2 : number
+>n : number
+>2 : 2
+
+    };
+    const result = (await input()) |> (await target());
+>result : number
+>(await input()) |> (await target()) : number
+>(await input()) : number
+>await input() : number
+>input() : Promise<number>
+>input : () => Promise<number>
+>(await target()) : (n: number) => number
+>await target() : (n: number) => number
+>target() : Promise<(n: number) => number>
+>target : () => Promise<(n: number) => number>
+
+    equal(log.join(), "input,target,call");
+>equal(log.join(), "input,target,call") : void
+>equal : (actual: unknown, expected: unknown) => void
+>log.join() : string
+>log.join : (separator?: string) => string
+>log : string[]
+>join : (separator?: string) => string
+>"input,target,call" : "input,target,call"
+
+    return result;
+>result : number
+}
+awaited().then(result => {
+>awaited().then(result => {    equal(result, 6);    console.log("pipe conformance ok");}) : Promise<void>
+>awaited().then : <TResult1 = number, TResult2 = never>(onfulfilled?: ((value: number) => TResult1 | PromiseLike<TResult1>) | null | undefined, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | null | undefined) => Promise<TResult1 | TResult2>
+>awaited() : Promise<number>
+>awaited : () => Promise<number>
+>then : <TResult1 = number, TResult2 = never>(onfulfilled?: ((value: number) => TResult1 | PromiseLike<TResult1>) | null | undefined, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | null | undefined) => Promise<TResult1 | TResult2>
+>result => {    equal(result, 6);    console.log("pipe conformance ok");} : (result: number) => void
+>result : number
+
+    equal(result, 6);
+>equal(result, 6) : void
+>equal : (actual: unknown, expected: unknown) => void
+>result : number
+>6 : 6
+
+    console.log("pipe conformance ok");
+>console.log("pipe conformance ok") : void
+>console.log : (...data: any[]) => void
+>console : Console
+>log : (...data: any[]) => void
+>"pipe conformance ok" : "pipe conformance ok"
+
+});
+

@@ -12,3 +12,33 @@ How hard would it be, with Codex and Claude Code, to modify current TypeScript (
 - higher-kinded types, such that generic types can be defined such that their type arguments can be required to be generic themselves, such that, for a given type argument, the type can be required to be generic of a given arity, and each type argument of the generic type that this type argument extends can have its possible types narrowed by using `extends`.  It should be possible to define a generic type with a type argument that can be any type that has a given number of type arguments, without specifying anything else about the type: for example, a developer should be able to require a type argument to be of a type that has a single type argument, regardless of what the generic type is, such that if it is just required that the type argument is of a generic type with a single type argument, then `Array` and `Set` would both be valid, but `Map` would not.  It should also be possible to impose requirements for the types of the inner type arguments, so that `Array` and `Set` both satisfy a constrained type argument, but the element type of the given `Array` or `Set` must extend some given type, such that for example `Array<string>` and `Set<string>` both work, but not `Array<number>` or `Set<number>`, for example.
 
 I would also like to be able to modify this fork to incorporate the functionality in Effect's TypeScript fork (which integrates with the VS Code Effect extension) when it is eventually updated to use version 7 of TypeScript.  I would also like to have a way to use these features in my add-ons for MineCraft: Bedrock Edition.  The official APIs and tools for Bedrock add-ons use `typescript@5.5.4`, but also already use `esbuild`, so code transformation/transpilation is already a part of the add-on build process.  I would also like to be able to use this fork in Expo applications (for Android and iOS) and React Native for Windows applications if possible (again, via an additional build step if needed).
+
+## Global Function helpers
+
+Include these static properties on the global `Function` object in the
+[pipe-operator delivery](Plan/PipeOperator.md). The
+[Function helper specification](Plan/FunctionHelpers.md) defines their typing,
+runtime behavior, acceptance criteria, and existing Beads implementation tasks.
+The proposed `Function::name` notation below uses the accessor operator from the
+broader roadmap; use `Function.name` until that syntax is available.
+
+| Proposed global | Purpose | Priority |
+| --- | --- | --- |
+| `Function::dual` | Data-first/data-last invocation | Very high |
+| `Function::flow` | Compose functions left to right | Very high |
+| `Function::curry` | Convert functions to curried form | Very high |
+| `Function::identity` | Return the given argument | High |
+| `Function::constant` | Create a function returning a fixed value | High |
+| `Function::flip` | Reverse argument order | High |
+| `Function::tupled` | Convert positional arguments to a tuple argument | High |
+| `Function::untupled` | Reverse tupled | High |
+| `Function::memoize` | Cache function results | High |
+| `Function::once` | Execute a function at most once | Medium |
+| `Function::compose` | Compose two functions | Medium |
+| `Function::absurd` | Mark unreachable branches using `never` | Medium |
+
+Very high, High, and Medium map to Beads P1, P2, and P3 respectively. All twelve
+helpers require both declarations and working runtime support. Preserve the
+specified binary `dual` call forms, adjacent-stage compatibility in variadic
+`flow`, exact zero/unary function identity in `curry`, and the
+`<In, Out extends In = In>(value: In) => Out` signature for `identity`.

@@ -2,6 +2,7 @@ package lsp
 
 import (
 	"context"
+	"errors"
 	"io"
 	"testing"
 
@@ -18,6 +19,47 @@ func (shutdownTestReader) Read() (*lsproto.Message, error) { return nil, io.EOF 
 type shutdownTestWriter struct{}
 
 func (shutdownTestWriter) Write(*lsproto.Message) error { return nil }
+
+func TestServerDispatchExitPreservesEOF(t *testing.T) {
+	t.Parallel()
+	server := NewServer(&ServerOptions{Err: io.Discard, Cwd: "/test"})
+	server.backgroundCtx = t.Context()
+	// Exit dispatch requires a session, but the handler does not access its state.
+	server.session = &project.Session{}
+	message := &lsproto.RequestMessage{Method: lsproto.MethodExit}
+	if err := server.requestQueue.Put(t.Context(), message); err != nil {
+		t.Fatal(err)
+	}
+	if err := server.dispatchLoop(t.Context()); !errors.Is(err, io.EOF) {
+		t.Fatalf("normal LSP exit returned %v, want EOF", err)
+	}
+}
+
+func TestServerDispatchCancellationPreservesCause(t *testing.T) {
+	t.Parallel()
+	server := NewServer(&ServerOptions{Err: io.Discard, Cwd: "/test"})
+	ctx, cancel := context.WithCancelCause(t.Context())
+	cancel(io.ErrUnexpectedEOF)
+	if err := server.dispatchLoop(ctx); !errors.Is(err, io.ErrUnexpectedEOF) {
+		t.Fatalf("dispatcher returned %v, want cancellation cause", err)
+	}
+}
+
+type failedShutdownTestReader struct{}
+
+func (failedShutdownTestReader) Read() (*lsproto.Message, error) {
+	return nil, io.ErrUnexpectedEOF
+}
+
+func TestServerTransportFailureIsNotNormalExit(t *testing.T) {
+	t.Parallel()
+	server := NewServer(&ServerOptions{
+		In: failedShutdownTestReader{}, Out: shutdownTestWriter{}, Err: io.Discard, Cwd: "/test",
+	})
+	if err := server.Run(t.Context()); !errors.Is(err, io.ErrUnexpectedEOF) {
+		t.Fatalf("server returned %v, want transport error", err)
+	}
+}
 
 // TestServerShutdownNoDeadlock verifies that operations after shutdown
 // don't block.

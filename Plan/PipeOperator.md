@@ -6,6 +6,10 @@ Populate `E:\TypeScriptFork` with the native compiler from the official [`typesc
 
 Deliver compiler source, tests, a working Windows binary, examples, and build/editor instructions.
 
+Extend this delivery with twelve static helpers on the global `Function` object,
+as specified in [Global Function helpers](FunctionHelpers.md). Supply both typed
+declarations and working JavaScript runtime support.
+
 ## Confirmed language behavior
 
 ```ts
@@ -24,6 +28,34 @@ value |> (x => x + 1)             // Parenthesized arrow functions work.
 - Multi-argument syntax requires a spread-prefixed array literal. Reject standalone `...Foo |> fn` and an unpack marker without a following pipe.
 - Ordinary arrays may supply arguments to fixed-arity functions. Check element compatibility, while leaving unknown array lengths to runtime. Missing arguments become `undefined`; excess arguments follow ordinary JavaScript behavior.
 - Pipes introduce no implicit awaiting, currying, or argument placeholders.
+- Explicit `Function.dual`, `Function.flow`, and `Function.curry` helpers support
+  data-last pipelines and function composition without changing pipe semantics.
+
+## Global Function helpers
+
+These are properties of the global `Function` constructor, not
+`Function.prototype` methods. `Function::name` denotes the same proposed static
+access in the broader accessor-operator roadmap; this pipe delivery uses the
+currently supported `Function.name` spelling and does not depend on `::`.
+
+| Helper | Purpose | Priority | Beads priority |
+| --- | --- | --- | --- |
+| `Function.dual` | Binary data-first/data-last invocation | Very high | P1 |
+| `Function.flow` | Compose a variable number of functions left to right | Very high | P1 |
+| `Function.curry` | Convert a function to curried form | Very high | P1 |
+| `Function.identity` | Return the given argument | High | P2 |
+| `Function.constant` | Create a function returning a fixed value | High | P2 |
+| `Function.flip` | Reverse argument order | High | P2 |
+| `Function.tupled` | Convert positional arguments to a tuple argument | High | P2 |
+| `Function.untupled` | Convert a tuple argument to positional arguments | High | P2 |
+| `Function.memoize` | Cache function results | High | P2 |
+| `Function.once` | Execute a function at most once | Medium | P3 |
+| `Function.compose` | Compose two functions | Medium | P3 |
+| `Function.absurd` | Mark unreachable branches using `never` | Medium | P3 |
+
+Priorities express implementation order; all twelve helpers are in scope. P0
+remains reserved for critical issues. The linked specification defines typing,
+runtime behavior, unresolved arity decisions, and acceptance coverage.
 
 ## Implementation
 
@@ -51,17 +83,36 @@ value |> (x => x + 1)             // Parenthesized arrow functions work.
 - Update formatting, semantic tokens, diagnostics, hover, completion, navigation, and signature help to understand pipes and their effective arguments.
 - Document the local compiler/LSP executable and VS Code workspace configuration.
 
+### Function helper delivery
+
+- Follow [FunctionHelpers.md](FunctionHelpers.md) for the public contracts.
+- Extend the fork's standard-library `FunctionConstructor` declarations and
+  account for their generation and packaging in the native compiler build.
+- Deliver automatic runtime availability before helper use across supported
+  targets, including ESNext; declarations alone do not provide these functions
+  in JavaScript hosts. Specify installation, repeated-load and collision behavior
+  before implementing the runtime integration.
+- Preserve argument tuples, inferred result types, and composition compatibility
+  in declarations and editor tooling. Reject invalid compositions at their source.
+- Keep helper tasks distinct from completed pipe syntax, checking, emission, and
+  editor tasks; integrate them into the remaining conformance, packaging, and
+  final regression work.
+
 ## Validation
 
 - Add scanner/parser tests for chaining, precedence, multiline input, nesting, TSX, unpack syntax, malformed input, and existing operator/spread regressions.
 - Add checker baselines for unary and multi-argument calls, tuples, ordinary arrays, incompatible elements, overloads, generics, optional/rest parameters, receivers, contextual callbacks, and inferred declarations.
 - Execute emitted JavaScript to verify single evaluation, left-first ordering, spread iteration, receiver preservation, thrown exceptions, recursive re-entry, default parameters, class fields, `await`, and `yield`.
 - Add language-server tests for diagnostics, hover, completion, navigation, signature help, and formatting.
+- Verify all twelve Function helpers with positive/negative type cases, inferred
+  declarations, editor cases, and execution of emitted JavaScript. Include the
+  helper-specific cases in [FunctionHelpers.md](FunctionHelpers.md).
 - Run the build, targeted tests, full Go suite with upstream submodule tests enabled, and upstream lint checks. Review generated files and baseline changes for unrelated differences.
 
 ## Defaults and boundaries
 
 - Enable pipes by default in this fork, using the compiler's existing TS, TSX, JS, and JSX modes.
-- Implement only the requested pipe functionality; preserve the broader roadmap for future work.
+- Implement the requested pipe functionality and twelve global Function helpers;
+  preserve the remainder of the broader roadmap for future work.
 - Preserve existing TypeScript behavior outside pipe expressions.
 - Implementation requires network access for source and dependency downloads; shell GitHub access is currently restricted, and `bd` is currently absent from PATH.

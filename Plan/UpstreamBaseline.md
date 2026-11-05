@@ -48,6 +48,8 @@ npm run build
 ```
 
 `npm run build` retains the upstream build task and produces `built/local/tsgo.exe`
-with library declarations alongside it. This initial build is the unmodified
-upstream compiler; pipe support and the `7.0.2-pipe.0` version are later epic tasks.
-See [PipeOperator.md](PipeOperator.md) for the full feature specification.
+with library declarations alongside it. The initial baseline build was the
+unmodified upstream compiler. The current fork includes pipe support and the
+`7.0.2-pipe.0` version; see [PipeDelivery.md](PipeDelivery.md) for delivery and
+verification commands and [PipeOperator.md](PipeOperator.md) for the full feature
+specification. The pinned commits above continue to describe upstream provenance.

@@ -76,4 +76,4 @@ dolt:
 export:
     auto: true
 sync:
-    remote: "git@github.com:GageSorrell/typescript.git"
+    remote: "git+ssh://git@github.com/GageSorrell/typescript.git"

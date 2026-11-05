@@ -4591,7 +4591,7 @@ func (p *Parser) parseConditionalExpressionRest(leftOperand *ast.Expression, pos
 func (p *Parser) parseBinaryExpressionOrHigher(precedence ast.OperatorPrecedence) *ast.Expression {
 	pos := p.nodePos()
 	var leftOperand *ast.Expression
-	if p.token == ast.KindDotDotDotToken && precedence < ast.OperatorPrecedencePipe {
+	if p.token == ast.KindDotDotDotToken && precedence < ast.OperatorPrecedencePipe && p.lookAhead((*Parser).nextTokenIsOpenBracket) {
 		leftOperand = p.parseUnpackedPipeInput()
 	} else {
 		leftOperand = p.parseUnaryExpressionOrHigher()
@@ -4617,6 +4617,10 @@ func (p *Parser) parseUnpackedPipeInput() *ast.Expression {
 		p.parseErrorAtCurrentToken(diagnostics.X_0_expected, "|>")
 	}
 	return result
+}
+
+func (p *Parser) nextTokenIsOpenBracket() bool {
+	return p.nextToken() == ast.KindOpenBracketToken
 }
 
 // Used with lookAhead to distinguish an unpacked pipe from an ordinary spread
@@ -6242,11 +6246,13 @@ func (p *Parser) isStartOfExpression() bool {
 	switch p.token {
 	case ast.KindPlusToken, ast.KindMinusToken, ast.KindTildeToken, ast.KindExclamationToken, ast.KindDeleteKeyword,
 		ast.KindTypeOfKeyword, ast.KindVoidKeyword, ast.KindPlusPlusToken, ast.KindMinusMinusToken, ast.KindLessThanToken,
-		ast.KindAwaitKeyword, ast.KindYieldKeyword, ast.KindPrivateIdentifier, ast.KindAtToken, ast.KindDotDotDotToken:
+		ast.KindAwaitKeyword, ast.KindYieldKeyword, ast.KindPrivateIdentifier, ast.KindAtToken:
 		// Yield/await always starts an expression.  Either it is an identifier (in which case
 		// it is definitely an expression).  Or it's a keyword (either because we're in
 		// a generator or async function, or in strict mode (or both)) and it started a yield or await expression.
 		return true
+	case ast.KindDotDotDotToken:
+		return p.lookAhead((*Parser).nextTokenIsOpenBracket)
 	}
 	// Error tolerance.  If we see the start of some binary operator, we consider
 	// that the start of an expression.  That way we'll parse out a missing identifier,
