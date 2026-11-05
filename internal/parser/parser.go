@@ -63,6 +63,12 @@ const (
 	jsdocScannerInfoHasSeeOrLink
 )
 
+type unpackedPipeLookaheadKey struct {
+	pos             int
+	contextFlags    ast.NodeFlags
+	parsingContexts ParsingContexts
+}
+
 type Parser struct {
 	scanner *scanner.Scanner
 	factory ast.NodeFactory
@@ -87,6 +93,7 @@ type Parser struct {
 	identifiers                map[string]string
 	identifierCount            int
 	notParenthesizedArrow      collections.Set[int]
+	unpackedPipeStarts         map[unpackedPipeLookaheadKey]bool
 	nodeSliceArena             core.Arena[*ast.Node]
 	stringSliceArena           core.Arena[string]
 	jsdocInfos                 []JSDocInfo
@@ -4252,6 +4259,11 @@ func (p *Parser) nextIsParenthesizedArrowFunctionExpression() core.Tristate {
 		// Simple case: "(..."
 		// This is an arrow function with a rest parameter.
 		if second == ast.KindDotDotDotToken {
+			// A spread-prefixed array followed by a pipe starts a parenthesized
+			// pipe expression, rather than an arrow function's rest parameter.
+			if p.lookAhead((*Parser).isStartOfUnpackedPipe) {
+				return core.TSFalse
+			}
 			return core.TSTrue
 		}
 		// Check for "(xxx yyy", where xxx is a modifier and yyy is an identifier. This
@@ -4578,8 +4590,57 @@ func (p *Parser) parseConditionalExpressionRest(leftOperand *ast.Expression, pos
 
 func (p *Parser) parseBinaryExpressionOrHigher(precedence ast.OperatorPrecedence) *ast.Expression {
 	pos := p.nodePos()
-	leftOperand := p.parseUnaryExpressionOrHigher()
+	var leftOperand *ast.Expression
+	if p.token == ast.KindDotDotDotToken && precedence < ast.OperatorPrecedencePipe {
+		leftOperand = p.parseUnpackedPipeInput()
+	} else {
+		leftOperand = p.parseUnaryExpressionOrHigher()
+	}
 	return p.parseBinaryExpressionRest(precedence, leftOperand, pos)
+}
+
+// Unpacking is only allowed directly before an array literal and directly before
+// a pipe. Retaining a SpreadElement on the binary expression's left preserves
+// the original syntax and each argument's source location for later phases.
+func (p *Parser) parseUnpackedPipeInput() *ast.Expression {
+	pos := p.nodePos()
+	p.parseExpected(ast.KindDotDotDotToken)
+	var input *ast.Expression
+	if p.token == ast.KindOpenBracketToken {
+		input = p.parseArrayLiteralExpression()
+	} else {
+		p.parseErrorAtCurrentToken(diagnostics.X_0_expected, "[")
+		input = p.parseUnaryExpressionOrHigher()
+	}
+	result := p.finishNode(p.factory.NewSpreadElement(input), pos)
+	if p.token != ast.KindBarGreaterThanToken {
+		p.parseErrorAtCurrentToken(diagnostics.X_0_expected, "|>")
+	}
+	return result
+}
+
+// Used with lookAhead to distinguish an unpacked pipe from an ordinary spread
+// in argument/array lists, and from a destructuring rest parameter in parentheses.
+func (p *Parser) isStartOfUnpackedPipe() bool {
+	if p.token != ast.KindDotDotDotToken {
+		return false
+	}
+	key := unpackedPipeLookaheadKey{p.scanner.TokenStart(), p.contextFlags, p.parsingContexts}
+	if result, ok := p.unpackedPipeStarts[key]; ok {
+		return result
+	}
+	if p.nextToken() != ast.KindOpenBracketToken {
+		return false
+	}
+	p.parseArrayLiteralExpression()
+	result := p.token == ast.KindBarGreaterThanToken
+	// Lookahead itself can encounter nested array spreads. Cache classifications
+	// across speculative parses to avoid exponential work on [...[...[...[]]]].
+	if p.unpackedPipeStarts == nil {
+		p.unpackedPipeStarts = make(map[unpackedPipeLookaheadKey]bool)
+	}
+	p.unpackedPipeStarts[key] = result
+	return result
 }
 
 func (p *Parser) parseBinaryExpressionRest(precedence ast.OperatorPrecedence, leftOperand *ast.Expression, pos int) *ast.Expression {
@@ -4884,7 +4945,7 @@ func (p *Parser) parseJsxExpression(inExpressionContext bool) *ast.Node {
 	var dotDotDotToken *ast.Node
 	var expression *ast.Expression
 	if p.token != ast.KindCloseBraceToken {
-		if !inExpressionContext {
+		if !inExpressionContext && !p.lookAhead((*Parser).isStartOfUnpackedPipe) {
 			dotDotDotToken = p.parseOptionalToken(ast.KindDotDotDotToken)
 		}
 		// Only an AssignmentExpression is valid here per the JSX spec,
@@ -5510,6 +5571,9 @@ func (p *Parser) parseArgumentExpression() *ast.Expression {
 func (p *Parser) parseArgumentOrArrayLiteralElement() *ast.Expression {
 	switch p.token {
 	case ast.KindDotDotDotToken:
+		if p.lookAhead((*Parser).isStartOfUnpackedPipe) {
+			return p.parseAssignmentExpressionOrHigher()
+		}
 		return p.parseSpreadElement()
 	case ast.KindCommaToken:
 		return p.finishNode(p.factory.NewOmittedExpression(), p.nodePos())
@@ -6178,7 +6242,7 @@ func (p *Parser) isStartOfExpression() bool {
 	switch p.token {
 	case ast.KindPlusToken, ast.KindMinusToken, ast.KindTildeToken, ast.KindExclamationToken, ast.KindDeleteKeyword,
 		ast.KindTypeOfKeyword, ast.KindVoidKeyword, ast.KindPlusPlusToken, ast.KindMinusMinusToken, ast.KindLessThanToken,
-		ast.KindAwaitKeyword, ast.KindYieldKeyword, ast.KindPrivateIdentifier, ast.KindAtToken:
+		ast.KindAwaitKeyword, ast.KindYieldKeyword, ast.KindPrivateIdentifier, ast.KindAtToken, ast.KindDotDotDotToken:
 		// Yield/await always starts an expression.  Either it is an identifier (in which case
 		// it is definitely an expression).  Or it's a keyword (either because we're in
 		// a generator or async function, or in strict mode (or both)) and it started a yield or await expression.

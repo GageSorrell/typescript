@@ -1,0 +1,173 @@
+//// [tests/cases/compiler/pipeOperatorEmit.ts] ////
+
+=== pipeOperatorEmit.ts ===
+/**
+ *
+ *
+ * @module typescript-go/testdata/tests/cases/compiler/pipeOperatorEmit
+ *
+ * @file      pipeOperatorEmit.ts
+ * @author    Gage Sorrell <gage@sorrell.sh>
+ * @copyright (c) 2026 Gage Sorrell
+ * @license   MIT
+ */
+
+
+const twice = (n: number) => n * 2;
+>twice : (n: number) => number
+>(n: number) => n * 2 : (n: number) => number
+>n : number
+>n * 2 : number
+>n : number
+>2 : 2
+
+const add = (a: number, b: number) => a + b;
+>add : (a: number, b: number) => number
+>(a: number, b: number) => a + b : (a: number, b: number) => number
+>a : number
+>b : number
+>a + b : number
+>a : number
+>b : number
+
+const values = [1, 2];
+>values : number[]
+>[1, 2] : number[]
+>1 : 1
+>2 : 2
+
+const object = { offset: 10, method(n: number) { return this.offset + n; } };
+>object : { offset: number; method(n: number): number; }
+>{ offset: 10, method(n: number) { return this.offset + n; } } : { offset: number; method(n: number): number; }
+>offset : number
+>10 : 10
+>method : (n: number) => number
+>n : number
+>this.offset + n : number
+>this.offset : number
+>this : { offset: number; method(n: number): number; }
+>offset : number
+>n : number
+
+// Each input is captured before its target is evaluated.
+export const chained = 1 |> twice |> twice;
+>chained : number
+>1 |> twice |> twice : number
+>1 |> twice : number
+>1 : 1
+>twice : (n: number) => number
+>twice : (n: number) => number
+
+export const explicit = ...[1, 2] |> add;
+>explicit : number
+>...[1, 2] |> add : number
+>...[1, 2] : number
+>[1, 2] : number[]
+>1 : 1
+>2 : 2
+>add : (a: number, b: number) => number
+
+export const expanded = ...[...values] |> add;
+>expanded : number
+>...[...values] |> add : number
+>...[...values] : number
+>[...values] : number[]
+>...values : number
+>values : number[]
+>add : (a: number, b: number) => number
+
+export const member = 1 |> (object.method);
+>member : number
+>1 |> (object.method) : number
+>1 : 1
+>(object.method) : (n: number) => number
+>object.method : (n: number) => number
+>object : { offset: number; method(n: number): number; }
+>method : (n: number) => number
+
+export const computed = 1 |> object["method"];
+>computed : number
+>1 |> object["method"] : number
+>1 : 1
+>object["method"] : (n: number) => number
+>object : { offset: number; method(n: number): number; }
+>"method" : "method"
+
+export const optional = 1 |> object?.method;
+>optional : number
+>1 |> object?.method : number
+>1 : 1
+>object?.method : (n: number) => number
+>object : { offset: number; method(n: number): number; }
+>method : (n: number) => number
+
+export const array = [1, 2] |> (items => items.length);
+>array : number
+>[1, 2] |> (items => items.length) : number
+>[1, 2] : number[]
+>1 : 1
+>2 : 2
+>(items => items.length) : (items: number[]) => number
+>items => items.length : (items: number[]) => number
+>items : number[]
+>items.length : number
+>items : number[]
+>length : number
+
+export function defaulted(value = 1 |> twice) { return value; }
+>defaulted : (value?: number) => number
+>value : number
+>1 |> twice : number
+>1 : 1
+>twice : (n: number) => number
+>value : number
+
+export async function awaited() {
+>awaited : () => Promise<number>
+
+    return (await Promise.resolve(1)) |> (await Promise.resolve(twice));
+>(await Promise.resolve(1)) |> (await Promise.resolve(twice)) : number
+>(await Promise.resolve(1)) : number
+>await Promise.resolve(1) : number
+>Promise.resolve(1) : Promise<number>
+>Promise.resolve : { (): Promise<void>; <T>(value: T): Promise<Awaited<T>>; <T>(value: T | PromiseLike<T>): Promise<Awaited<T>>; }
+>Promise : PromiseConstructor
+>resolve : { (): Promise<void>; <T>(value: T): Promise<Awaited<T>>; <T>(value: T | PromiseLike<T>): Promise<Awaited<T>>; }
+>1 : 1
+>(await Promise.resolve(twice)) : (n: number) => number
+>await Promise.resolve(twice) : (n: number) => number
+>Promise.resolve(twice) : Promise<(n: number) => number>
+>Promise.resolve : { (): Promise<void>; <T>(value: T): Promise<Awaited<T>>; <T>(value: T | PromiseLike<T>): Promise<Awaited<T>>; }
+>Promise : PromiseConstructor
+>resolve : { (): Promise<void>; <T>(value: T): Promise<Awaited<T>>; <T>(value: T | PromiseLike<T>): Promise<Awaited<T>>; }
+>twice : (n: number) => number
+}
+export function* yielded() {
+>yielded : () => Generator<number, number, number>
+
+    return (yield 1) |> twice;
+>(yield 1) |> twice : number
+>(yield 1) : any
+>yield 1 : any
+>1 : 1
+>twice : (n: number) => number
+}
+export class C {
+>C : C
+
+    value = 1 |> twice;
+>value : number
+>1 |> twice : number
+>1 : 1
+>twice : (n: number) => number
+
+    static value = ...[...values] |> add;
+>value : number
+>...[...values] |> add : number
+>...[...values] : number
+>[...values] : number[]
+>...values : number
+>values : number[]
+>add : (a: number, b: number) => number
+}
+

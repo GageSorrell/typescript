@@ -1,0 +1,256 @@
+//// [tests/cases/compiler/pipeOperatorChecking.ts] ////
+
+=== pipeOperatorChecking.ts ===
+/**
+ *
+ *
+ * @module typescript-go/testdata/tests/cases/compiler/pipeOperatorChecking
+ *
+ * @file      pipeOperatorChecking.ts
+ * @author    Gage Sorrell <gage@sorrell.sh>
+ * @copyright (c) 2026 Gage Sorrell
+ * @license   MIT
+ */
+
+
+declare function identity<T>(value: T): T;
+>identity : <T>(value: T) => T
+>value : T
+
+declare function box<T>(value: T): { value: T };
+>box : <T>(value: T) => { value: T; }
+>value : T
+>value : T
+
+declare function count(value: string): number;
+>count : (value: string) => number
+>value : string
+
+declare function select(value: number): number;
+>select : { (value: number): number; (value: string): string; }
+>value : number
+
+declare function select(value: string): string;
+>select : { (value: number): number; (value: string): string; }
+>value : string
+
+declare function pair(a: number, b: string): { a: number; b: string };
+>pair : (a: number, b: string) => { a: number; b: string; }
+>a : number
+>b : string
+>a : number
+>b : string
+
+declare function optional(a: number, b?: string): number;
+>optional : (a: number, b?: string) => number
+>a : number
+>b : string | undefined
+
+declare function rest(a: number, ...values: string[]): string[];
+>rest : (a: number, ...values: string[]) => string[]
+>a : number
+>values : string[]
+
+declare function useCallback(callback: (value: string) => number): number;
+>useCallback : (callback: (value: string) => number) => number
+>callback : (value: string) => number
+>value : string
+
+declare function apply(callback: (value: string) => number, value: string): number;
+>apply : (callback: (value: string) => number, value: string) => number
+>callback : (value: string) => number
+>value : string
+>value : string
+
+declare function factory(): (value: number) => string;
+>factory : () => (value: number) => string
+>value : number
+
+const chained = "hello" |> count |> identity |> box;
+>chained : { value: number; }
+>"hello" |> count |> identity |> box : { value: number; }
+>"hello" |> count |> identity : number
+>"hello" |> count : number
+>"hello" : "hello"
+>count : (value: string) => number
+>identity : <T>(value: T) => T
+>box : <T>(value: T) => { value: T; }
+
+const selectedNumber = 1 |> select;
+>selectedNumber : number
+>1 |> select : number
+>1 : 1
+>select : { (value: number): number; (value: string): string; }
+
+const selectedString = "x" |> select;
+>selectedString : string
+>"x" |> select : string
+>"x" : "x"
+>select : { (value: number): number; (value: string): string; }
+
+const unpacked = ...[1, "x"] |> pair;
+>unpacked : { a: number; b: string; }
+>...[1, "x"] |> pair : { a: number; b: string; }
+>...[1, "x"] : string | number
+>[1, "x"] : (string | number)[]
+>1 : 1
+>"x" : "x"
+>pair : (a: number, b: string) => { a: number; b: string; }
+
+const tuple = [1, "x"] as const;
+>tuple : readonly [1, "x"]
+>[1, "x"] as const : readonly [1, "x"]
+>[1, "x"] : readonly [1, "x"]
+>1 : 1
+>"x" : "x"
+
+const unpackedTuple = ...[...tuple] |> pair;
+>unpackedTuple : { a: number; b: string; }
+>...[...tuple] |> pair : { a: number; b: string; }
+>...[...tuple] : "x" | 1
+>[...tuple] : ("x" | 1)[]
+>...tuple : "x" | 1
+>tuple : readonly [1, "x"]
+>pair : (a: number, b: string) => { a: number; b: string; }
+
+const optionalArgument = ...[1] |> optional;
+>optionalArgument : number
+>...[1] |> optional : number
+>...[1] : number
+>[1] : number[]
+>1 : 1
+>optional : (a: number, b?: string) => number
+
+const restArguments = ...[1, "a", "b"] |> rest;
+>restArguments : string[]
+>...[1, "a", "b"] |> rest : string[]
+>...[1, "a", "b"] : string | number
+>[1, "a", "b"] : (string | number)[]
+>1 : 1
+>"a" : "a"
+>"b" : "b"
+>rest : (a: number, ...values: string[]) => string[]
+
+const callback = (value => value.length) |> useCallback;
+>callback : number
+>(value => value.length) |> useCallback : number
+>(value => value.length) : (value: string) => number
+>value => value.length : (value: string) => number
+>value : string
+>value.length : number
+>value : string
+>length : number
+>useCallback : (callback: (value: string) => number) => number
+
+const unpackedCallback = ...[value => value.length, "x"] |> apply;
+>unpackedCallback : number
+>...[value => value.length, "x"] |> apply : number
+>...[value => value.length, "x"] : string | ((value: string) => number)
+>[value => value.length, "x"] : (string | ((value: string) => number))[]
+>value => value.length : (value: string) => number
+>value : string
+>value.length : number
+>value : string
+>length : number
+>"x" : "x"
+>apply : (callback: (value: string) => number, value: string) => number
+
+const inline = 1 |> (value => value.toFixed());
+>inline : string
+>1 |> (value => value.toFixed()) : string
+>1 : 1
+>(value => value.toFixed()) : (value: number) => string
+>value => value.toFixed() : (value: number) => string
+>value : number
+>value.toFixed() : string
+>value.toFixed : (fractionDigits?: number) => string
+>value : number
+>toFixed : (fractionDigits?: number) => string
+
+const inlineMany = ...[1, "x"] |> ((n, s) => n.toFixed() + s.toUpperCase());
+>inlineMany : string
+>...[1, "x"] |> ((n, s) => n.toFixed() + s.toUpperCase()) : string
+>...[1, "x"] : string | number
+>[1, "x"] : (string | number)[]
+>1 : 1
+>"x" : "x"
+>((n, s) => n.toFixed() + s.toUpperCase()) : (n: number, s: string) => string
+>(n, s) => n.toFixed() + s.toUpperCase() : (n: number, s: string) => string
+>n : number
+>s : string
+>n.toFixed() + s.toUpperCase() : string
+>n.toFixed() : string
+>n.toFixed : (fractionDigits?: number) => string
+>n : number
+>toFixed : (fractionDigits?: number) => string
+>s.toUpperCase() : string
+>s.toUpperCase : () => string
+>s : string
+>toUpperCase : () => string
+
+const factoryCall = 1 |> factory();
+>factoryCall : string
+>1 |> factory() : string
+>1 : 1
+>factory() : (value: number) => string
+>factory : () => (value: number) => string
+
+const instantiated = "x" |> identity<string>;
+>instantiated : string
+>"x" |> identity<string> : string
+>"x" : "x"
+>identity<string> : (value: string) => string
+>identity : <T>(value: T) => T
+
+const object = {
+>object : { prefix: string; method(this: { prefix: string; }, value: number): string; }
+>{    prefix: "value=",    method(this: { prefix: string }, value: number) { return this.prefix + value; },} : { prefix: string; method(this: { prefix: string; }, value: number): string; }
+
+    prefix: "value=",
+>prefix : string
+>"value=" : "value="
+
+    method(this: { prefix: string }, value: number) { return this.prefix + value; },
+>method : (this: { prefix: string; }, value: number) => string
+>this : { prefix: string; }
+>prefix : string
+>value : number
+>this.prefix + value : string
+>this.prefix : string
+>this : { prefix: string; }
+>prefix : string
+>value : number
+
+};
+const receiver = 1 |> object.method;
+>receiver : string
+>1 |> object.method : string
+>1 : 1
+>object.method : (this: { prefix: string; }, value: number) => string
+>object : { prefix: string; method(this: { prefix: string; }, value: number): string; }
+>method : (this: { prefix: string; }, value: number) => string
+
+const parenthesizedReceiver = 1 |> (object.method);
+>parenthesizedReceiver : string
+>1 |> (object.method) : string
+>1 : 1
+>(object.method) : (this: { prefix: string; }, value: number) => string
+>object.method : (this: { prefix: string; }, value: number) => string
+>object : { prefix: string; method(this: { prefix: string; }, value: number): string; }
+>method : (this: { prefix: string; }, value: number) => string
+
+const values = [];
+>values : any[]
+>[] : never[]
+
+1 |> values.push;
+>1 |> values.push : number
+>1 : 1
+>values.push : (...items: any[]) => number
+>values : any[]
+>push : (...items: any[]) => number
+
+const evolved = values;
+>evolved : number[]
+>values : number[]
+

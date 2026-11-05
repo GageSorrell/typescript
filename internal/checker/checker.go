@@ -595,6 +595,7 @@ type Checker struct {
 	inlineLevel                                 int
 	serializationLevel                          int
 	currentNode                                 *ast.Node
+	pipeOptionalArguments                       map[*ast.Node]bool
 	varianceTypeParameter                       *Type
 	languageVersion                             core.ScriptTarget
 	moduleKind                                  core.ModuleKind
@@ -2517,7 +2518,7 @@ func (c *Checker) checkDeferredNode(node *ast.Node) {
 	case ast.KindVoidExpression:
 		c.checkExpression(node.Expression())
 	case ast.KindBinaryExpression:
-		if ast.IsInstanceOfExpression(node) {
+		if ast.IsInstanceOfExpression(node) || ast.IsPipeExpression(node) {
 			c.resolveUntypedCall(node)
 		}
 	}
@@ -8326,7 +8327,7 @@ func (c *Checker) checkCallExpression(node *ast.Node, checkMode CheckMode) *Type
 	if returnType.flags&TypeFlagsESSymbolLike != 0 && c.isSymbolOrSymbolForCall(node) {
 		return c.getESSymbolLikeTypeForNode(ast.WalkUpParenthesizedExpressions(node.Parent))
 	}
-	if ast.IsCallExpression(node) && node.QuestionDotToken() == nil && ast.IsExpressionStatement(node.Parent) && returnType.flags&TypeFlagsVoid != 0 && c.getTypePredicateOfSignature(signature) != nil {
+	if (ast.IsCallExpression(node) || ast.IsPipeExpression(node)) && node.QuestionDotToken() == nil && ast.IsExpressionStatement(node.Parent) && returnType.flags&TypeFlagsVoid != 0 && c.getTypePredicateOfSignature(signature) != nil {
 		if !ast.IsDottedName(node.Expression()) {
 			c.error(node.Expression(), diagnostics.Assertions_require_the_call_target_to_be_an_identifier_or_qualified_name)
 		} else if c.getEffectsSignature(node) == nil {
@@ -8355,7 +8356,7 @@ func (c *Checker) addDeprecatedSuggestionWithSignature(location *ast.Node, decla
 }
 
 func (c *Checker) isSymbolOrSymbolForCall(node *ast.Node) bool {
-	if !ast.IsCallExpression(node) {
+	if !ast.IsCallExpression(node) && !ast.IsPipeExpression(node) {
 		return false
 	}
 	left := node.Expression()
@@ -8439,6 +8440,9 @@ func (c *Checker) resolveSignature(node *ast.Node, candidatesOutArray *[]*Signat
 	case ast.KindJsxOpeningFragment, ast.KindJsxOpeningElement, ast.KindJsxSelfClosingElement:
 		return c.resolveJsxOpeningLikeElement(node, candidatesOutArray, checkMode)
 	case ast.KindBinaryExpression:
+		if ast.IsPipeExpression(node) {
+			return c.resolveCallExpression(node, candidatesOutArray, checkMode)
+		}
 		return c.resolveInstanceofExpression(node, candidatesOutArray, checkMode)
 	}
 	panic("Unhandled case in resolveSignature")
@@ -8820,7 +8824,7 @@ func (c *Checker) resolveCall(node *ast.Node, signatures []*Signature, candidate
 	isTaggedTemplate := node.Kind == ast.KindTaggedTemplateExpression
 	isDecorator := node.Kind == ast.KindDecorator
 	isJsxOpeningOrSelfClosingElement := ast.IsJsxOpeningLikeElement(node)
-	isInstanceof := node.Kind == ast.KindBinaryExpression
+	isInstanceof := ast.IsInstanceOfExpression(node)
 	reportErrors := !c.isInferencePartiallyBlocked && candidatesOutArray == nil
 	var s CallState
 	s.node = node
@@ -9081,6 +9085,9 @@ func (c *Checker) chooseOverload(s *CallState, relation *Relation) *Signature {
 }
 
 func (c *Checker) hasCorrectArity(node *ast.Node, args []*ast.Node, signature *Signature, signatureHelpTrailingComma bool) bool {
+	if hasPipeUnknownSpread(node, args) {
+		return c.hasEffectiveRestParameter(signature) || c.pipeMinimumArgumentCount(args) <= c.getParameterCount(signature)
+	}
 	if ast.IsJsxOpeningFragment(node) {
 		return true
 	}
@@ -9107,7 +9114,7 @@ func (c *Checker) hasCorrectArity(node *ast.Node, args []*ast.Node, signature *S
 		}
 	case ast.IsDecorator(node):
 		argCount = c.getDecoratorArgumentCount(node, signature)
-	case ast.IsBinaryExpression(node):
+	case ast.IsInstanceOfExpression(node):
 		argCount = 1
 	case ast.IsJsxOpeningLikeElement(node):
 		callIsIncomplete = node.Attributes().End() == node.End()
@@ -9253,6 +9260,9 @@ func (c *Checker) isSignatureApplicable(node *ast.Node, args []*ast.Node, signat
 		}
 	}
 	headMessage := diagnostics.Argument_of_type_0_is_not_assignable_to_parameter_of_type_1
+	if hasPipeUnknownSpread(node, args) {
+		return c.checkPipeSpreadArguments(args, signature, relation, checkMode, reportErrors, diagnosticOutput)
+	}
 	restType := c.getNonArrayRestType(signature)
 	var argCount int
 	if restType != nil {
@@ -9319,12 +9329,12 @@ func (c *Checker) maybeAddMissingAwaitInfo(errorNode *ast.Node, source *Type, ta
 
 // Returns the `this` argument node in calls like `x.f(...)` and `x[f](...)`. `nil` otherwise.
 func (c *Checker) getThisArgumentOfCall(node *ast.Node) *ast.Node {
-	if ast.IsBinaryExpression(node) {
+	if ast.IsInstanceOfExpression(node) {
 		return node.AsBinaryExpression().Right
 	}
 	var expression *ast.Node
 	switch {
-	case ast.IsCallExpression(node):
+	case ast.IsCallExpression(node) || ast.IsPipeExpression(node):
 		expression = node.Expression()
 	case ast.IsTaggedTemplateExpression(node):
 		expression = node.AsTaggedTemplateExpression().Tag
@@ -9371,7 +9381,7 @@ func (c *Checker) inferTypeArguments(node *ast.Node, signature *Signature, args 
 	// example, given a 'function wrap<T, U>(cb: (x: T) => U): (x: T) => U' and a call expression
 	// 'let f: (x: string) => number = wrap(s => s.length)', we infer from the declared type of 'f' to the
 	// return type of 'wrap'.
-	if !ast.IsDecorator(node) && !ast.IsBinaryExpression(node) {
+	if !ast.IsDecorator(node) && (!ast.IsBinaryExpression(node) || ast.IsPipeExpression(node)) {
 		skipBindingPatterns := core.Every(signature.typeParameters, func(p *Type) bool { return c.getDefaultFromTypeParameter(p) != nil })
 		contextualType := c.getContextualType(node, core.IfElse(skipBindingPatterns, ContextFlagsSkipBindingPatterns, ContextFlagsNone))
 		if contextualType != nil {
@@ -9452,6 +9462,10 @@ func (c *Checker) inferTypeArguments(node *ast.Node, signature *Signature, args 
 	if thisType != nil && c.couldContainTypeVariables(thisType) {
 		thisArgumentNode := c.getThisArgumentOfCall(node)
 		c.inferTypes(context.inferences, c.getThisArgumentType(thisArgumentNode), thisType, InferencePriorityNone, false)
+	}
+	if hasPipeUnknownSpread(node, args) {
+		c.inferPipeSpreadArguments(args, signature, context, checkMode)
+		return c.getInferredTypes(context)
 	}
 	for i := range argCount {
 		arg := args[i]
@@ -9679,6 +9693,15 @@ func (c *Checker) addImplementationSuccessElaboration(s *CallState, failed *Sign
 }
 
 func (c *Checker) getArgumentArityError(node *ast.Node, signatures []*Signature, args []*ast.Node, headMessage *diagnostics.Message) *ast.Diagnostic {
+	if hasPipeUnknownSpread(node, args) {
+		var knownArgs []*ast.Node
+		for _, arg := range args {
+			if !isSpreadArgument(arg) && !c.pipeOptionalArguments[arg] {
+				knownArgs = append(knownArgs, arg)
+			}
+		}
+		return c.getArgumentArityError(node, signatures, knownArgs, headMessage)
+	}
 	spreadIndex := c.getSpreadArgumentIndex(args)
 	if spreadIndex > -1 {
 		return NewDiagnosticForNode(args[spreadIndex], diagnostics.A_spread_argument_must_either_have_a_tuple_type_or_be_passed_to_a_rest_parameter)
@@ -9887,7 +9910,13 @@ func (c *Checker) resolveUntypedCall(node *ast.Node) *Signature {
 	case ast.KindJsxOpeningElement, ast.KindJsxSelfClosingElement:
 		c.checkExpression(node.Attributes())
 	case ast.KindBinaryExpression:
-		c.checkExpression(node.AsBinaryExpression().Left)
+		if ast.IsPipeExpression(node) {
+			for _, argument := range node.Arguments() {
+				c.checkExpression(argument)
+			}
+		} else {
+			c.checkExpression(node.AsBinaryExpression().Left)
+		}
 	case ast.KindCallExpression, ast.KindNewExpression:
 		for _, argument := range node.Arguments() {
 			c.checkExpression(argument)
@@ -12291,6 +12320,9 @@ func (c *Checker) checkAssertionDeferred(node *ast.Node) {
 }
 
 func (c *Checker) checkBinaryExpression(node *ast.Node, checkMode CheckMode) *Type {
+	if ast.IsPipeExpression(node) {
+		return c.checkCallExpression(node, checkMode)
+	}
 	binary := node.AsBinaryExpression()
 	return c.checkBinaryLikeExpression(binary.Left, binary.OperatorToken, binary.Right, checkMode, node)
 }
@@ -12924,6 +12956,8 @@ func (c *Checker) getSyntacticNullishnessSemantics(node *ast.Node) PredicateSema
 		// List of operators that can produce null/undefined:
 		// || ||= && &&=
 		switch node.AsBinaryExpression().OperatorToken.Kind {
+		case ast.KindBarGreaterThanToken:
+			return PredicateSemanticsSometimes
 		case ast.KindBarBarToken,
 			ast.KindBarBarEqualsToken,
 			ast.KindAmpersandAmpersandToken,
@@ -29135,6 +29169,9 @@ func (c *Checker) getContextualType(node *ast.Node, contextFlags ContextFlags) *
 	case ast.KindSpreadAssignment:
 		return c.getContextualType(parent.Parent, contextFlags)
 	case ast.KindArrayLiteralExpression:
+		if ast.IsSpreadElement(parent.Parent) && ast.IsPipeExpression(parent.Parent.Parent) && parent.Parent.Parent.AsBinaryExpression().Left == parent.Parent {
+			return c.getContextualTypeForArgument(parent.Parent.Parent, node)
+		}
 		t := c.getApparentTypeOfContextualType(parent, contextFlags)
 		elementIndex := ast.IndexOfNode(parent.Elements(), node)
 		if elementIndex < 0 {
@@ -29222,6 +29259,10 @@ func (c *Checker) getContextuallyTypedParameterType(parameter *ast.Node) *Type {
 		args := c.getEffectiveCallArguments(iife)
 		indexOfParameter := slices.Index(fn.Parameters(), parameter)
 		if hasDotDotDotToken(parameter) {
+			if hasPipeUnknownSpread(iife, args) {
+				restArgs := c.pipeSpreadRestArguments(args, indexOfParameter)
+				return c.getSpreadArgumentType(restArgs, 0, len(restArgs), c.anyType, nil, CheckModeNormal)
+			}
 			return c.getSpreadArgumentType(args, indexOfParameter, len(args), c.anyType, nil /*context*/, CheckModeNormal)
 		}
 		links := c.signatureLinks.Get(iife)
@@ -29229,6 +29270,11 @@ func (c *Checker) getContextuallyTypedParameterType(parameter *ast.Node) *Type {
 		links.resolvedSignature = c.anySignature
 		var t *Type
 		switch {
+		case hasPipeUnknownSpread(iife, args):
+			t = c.pipeSpreadInputTypeAtPosition(args, indexOfParameter)
+			if t == nil && parameter.Initializer() == nil {
+				t = c.undefinedWideningType
+			}
 		case indexOfParameter < len(args):
 			t = c.getWidenedLiteralType(c.checkExpression(args[indexOfParameter]))
 		case parameter.Initializer() != nil:
@@ -29548,6 +29594,12 @@ func (c *Checker) getContextualTypeForArgumentAtIndex(callTarget *ast.Node, argI
 	if ast.IsJsxOpeningLikeElement(callTarget) && argIndex == 0 {
 		return c.getEffectiveFirstArgumentForJsxSignature(signature, callTarget)
 	}
+	if ast.IsPipeExpression(callTarget) {
+		args := c.getEffectiveCallArguments(callTarget)
+		if hasPipeUnknownSpread(callTarget, args) && argIndex < len(args) {
+			return c.pipeSpreadContextualType(c.pipeSpreadArgumentTargets(args, signature)[argIndex])
+		}
+	}
 	restIndex := len(signature.parameters) - 1
 	if signatureHasRestParameter(signature) && argIndex >= restIndex {
 		return c.getIndexedAccessTypeEx(c.getTypeOfSymbol(signature.parameters[restIndex]), c.getNumberLiteralType(jsnum.Number(argIndex-restIndex)), AccessFlagsContextual, nil, nil)
@@ -29569,6 +29621,10 @@ func (c *Checker) getContextualTypeForBinaryOperand(node *ast.Node, contextFlags
 		return c.getTypeFromTypeNode(t)
 	}
 	switch binary.OperatorToken.Kind {
+	case ast.KindBarGreaterThanToken:
+		if node == binary.Left {
+			return c.getContextualTypeForArgument(binary.AsNode(), node)
+		}
 	case ast.KindEqualsToken, ast.KindAmpersandAmpersandEqualsToken, ast.KindBarBarEqualsToken, ast.KindQuestionQuestionEqualsToken:
 		// In an assignment expression, the right operand is contextually typed by the type of the left operand
 		// unless it's an assignment declaration.
@@ -29816,7 +29872,7 @@ func (c *Checker) getEffectiveCallArguments(node *ast.Node) []*ast.Node {
 		return args
 	case ast.IsDecorator(node):
 		return c.getEffectiveDecoratorArguments(node)
-	case ast.IsBinaryExpression(node):
+	case ast.IsInstanceOfExpression(node):
 		// Handles instanceof operator
 		return []*ast.Node{node.AsBinaryExpression().Left}
 	case ast.IsJsxOpeningLikeElement(node):
@@ -29850,6 +29906,12 @@ func (c *Checker) getEffectiveCallArguments(node *ast.Node) []*ast.Node {
 							syntheticType = c.createArrayType(t)
 						}
 						syntheticArg := c.createSyntheticExpression(arg, syntheticType, flags&ElementFlagsVariable != 0, elementInfos[i].labeledDeclaration)
+						if ast.IsPipeExpression(node) && flags&ElementFlagsOptional != 0 {
+							if c.pipeOptionalArguments == nil {
+								c.pipeOptionalArguments = make(map[*ast.Node]bool)
+							}
+							c.pipeOptionalArguments[syntheticArg] = true
+						}
 						effectiveArgs = append(effectiveArgs, syntheticArg)
 					}
 				} else {

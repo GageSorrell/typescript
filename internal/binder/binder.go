@@ -2143,7 +2143,7 @@ func (b *Binder) bindExpressionStatement(node *ast.Node) {
 func (b *Binder) maybeBindExpressionFlowIfCall(node *ast.Node) {
 	// A top level or comma expression call expression with a dotted function name and at least one argument
 	// is potentially an assertion and is therefore included in the control flow.
-	if ast.IsCallExpression(node) {
+	if ast.IsCallExpression(node) || ast.IsPipeExpression(node) {
 		if node.Expression().Kind != ast.KindSuperKeyword && ast.IsDottedName(node.Expression()) {
 			b.currentFlow = b.createFlowCall(b.currentFlow, node)
 		}
@@ -2219,6 +2219,14 @@ func (b *Binder) bindDestructuringAssignmentFlow(node *ast.Node) {
 func (b *Binder) bindBinaryExpressionFlow(node *ast.Node) {
 	expr := node.AsBinaryExpression()
 	operator := expr.OperatorToken.Kind
+	if ast.IsPipeExpression(node) {
+		// Inputs are evaluated before the callable, including IIFE bodies.
+		b.bind(expr.Left)
+		b.bind(expr.OperatorToken)
+		b.bind(expr.Right)
+		b.bindCallArrayMutation(node)
+		return
+	}
 	if ast.IsLogicalOrCoalescingBinaryOperator(operator) || ast.IsLogicalOrCoalescingAssignmentOperator(operator) {
 		if isTopLevelLogicalExpression(node) {
 			postExpressionLabel := b.createBranchLabel()
@@ -2431,8 +2439,12 @@ func (b *Binder) bindCallExpressionFlow(node *ast.Node) {
 			}
 		}
 	}
-	if ast.IsPropertyAccessExpression(call.Expression) {
-		access := call.Expression.AsPropertyAccessExpression()
+	b.bindCallArrayMutation(node)
+}
+
+func (b *Binder) bindCallArrayMutation(node *ast.Node) {
+	if ast.IsPropertyAccessExpression(node.Expression()) {
+		access := node.Expression().AsPropertyAccessExpression()
 		if ast.IsIdentifier(access.Name()) && isNarrowableOperand(access.Expression) && ast.IsPushOrUnshiftIdentifier(access.Name()) {
 			b.currentFlow = b.createFlowMutation(ast.FlowFlagsArrayMutation, b.currentFlow, node)
 		}
@@ -2649,14 +2661,11 @@ func isNarrowableReference(node *ast.Node) bool {
 }
 
 func hasNarrowableArgument(expr *ast.Node) bool {
-	call := expr.AsCallExpression()
-	for _, argument := range call.Arguments.Nodes { //nolint:modernize
-		if containsNarrowableReference(argument) {
-			return true
-		}
+	if slices.ContainsFunc(expr.Arguments(), containsNarrowableReference) {
+		return true
 	}
-	if ast.IsPropertyAccessExpression(call.Expression) {
-		if containsNarrowableReference(call.Expression.Expression()) {
+	if ast.IsPropertyAccessExpression(expr.Expression()) {
+		if containsNarrowableReference(expr.Expression().Expression()) {
 			return true
 		}
 	}
@@ -2665,6 +2674,8 @@ func hasNarrowableArgument(expr *ast.Node) bool {
 
 func isNarrowingBinaryExpression(expr *ast.BinaryExpression) bool {
 	switch expr.OperatorToken.Kind {
+	case ast.KindBarGreaterThanToken:
+		return hasNarrowableArgument(expr.AsNode())
 	case ast.KindEqualsToken, ast.KindBarBarEqualsToken, ast.KindAmpersandAmpersandEqualsToken, ast.KindQuestionQuestionEqualsToken:
 		return containsNarrowableReference(expr.Left)
 	case ast.KindEqualsEqualsToken, ast.KindExclamationEqualsToken, ast.KindEqualsEqualsEqualsToken, ast.KindExclamationEqualsEqualsToken:

@@ -1,0 +1,138 @@
+//// [tests/cases/compiler/pipeOperatorArrayErrors.ts] ////
+
+=== pipeOperatorArrayErrors.ts ===
+/**
+ *
+ *
+ * @module typescript-go/testdata/tests/cases/compiler/pipeOperatorArrayErrors
+ *
+ * @file      pipeOperatorArrayErrors.ts
+ * @author    Gage Sorrell <gage@sorrell.sh>
+ * @copyright (c) 2026 Gage Sorrell
+ * @license   MIT
+ */
+
+
+declare function numbers(a: number, b: number): void;
+>numbers : Symbol(numbers, Decl(pipeOperatorArrayErrors.ts, 0, 0))
+>a : Symbol(a, Decl(pipeOperatorArrayErrors.ts, 12, 25))
+>b : Symbol(b, Decl(pipeOperatorArrayErrors.ts, 12, 35))
+
+declare function one(a: number): void;
+>one : Symbol(one, Decl(pipeOperatorArrayErrors.ts, 12, 53))
+>a : Symbol(a, Decl(pipeOperatorArrayErrors.ts, 13, 21))
+
+declare function heterogeneous(a: number, b: string): void;
+>heterogeneous : Symbol(heterogeneous, Decl(pipeOperatorArrayErrors.ts, 13, 38))
+>a : Symbol(a, Decl(pipeOperatorArrayErrors.ts, 14, 31))
+>b : Symbol(b, Decl(pipeOperatorArrayErrors.ts, 14, 41))
+
+declare function tailCanBeEither(a: number, b: number | string): void;
+>tailCanBeEither : Symbol(tailCanBeEither, Decl(pipeOperatorArrayErrors.ts, 14, 59))
+>a : Symbol(a, Decl(pipeOperatorArrayErrors.ts, 15, 33))
+>b : Symbol(b, Decl(pipeOperatorArrayErrors.ts, 15, 43))
+
+declare function stringRest(a: number, ...rest: string[]): void;
+>stringRest : Symbol(stringRest, Decl(pipeOperatorArrayErrors.ts, 15, 70))
+>a : Symbol(a, Decl(pipeOperatorArrayErrors.ts, 16, 28))
+>rest : Symbol(rest, Decl(pipeOperatorArrayErrors.ts, 16, 38))
+
+declare function suffix(...args: [...number[], boolean]): void;
+>suffix : Symbol(suffix, Decl(pipeOperatorArrayErrors.ts, 16, 64))
+>args : Symbol(args, Decl(pipeOperatorArrayErrors.ts, 17, 24))
+
+declare function select(a: number, b: number): number;
+>select : Symbol(select, Decl(pipeOperatorArrayErrors.ts, 17, 63), Decl(pipeOperatorArrayErrors.ts, 18, 54))
+>a : Symbol(a, Decl(pipeOperatorArrayErrors.ts, 18, 24))
+>b : Symbol(b, Decl(pipeOperatorArrayErrors.ts, 18, 34))
+
+declare function select(a: string, b: string): string;
+>select : Symbol(select, Decl(pipeOperatorArrayErrors.ts, 17, 63), Decl(pipeOperatorArrayErrors.ts, 18, 54))
+>a : Symbol(a, Decl(pipeOperatorArrayErrors.ts, 19, 24))
+>b : Symbol(b, Decl(pipeOperatorArrayErrors.ts, 19, 34))
+
+declare function constrained<T extends number>(a: T, b: T): T;
+>constrained : Symbol(constrained, Decl(pipeOperatorArrayErrors.ts, 19, 54))
+>T : Symbol(T, Decl(pipeOperatorArrayErrors.ts, 20, 29))
+>a : Symbol(a, Decl(pipeOperatorArrayErrors.ts, 20, 47))
+>T : Symbol(T, Decl(pipeOperatorArrayErrors.ts, 20, 29))
+>b : Symbol(b, Decl(pipeOperatorArrayErrors.ts, 20, 52))
+>T : Symbol(T, Decl(pipeOperatorArrayErrors.ts, 20, 29))
+>T : Symbol(T, Decl(pipeOperatorArrayErrors.ts, 20, 29))
+
+declare const ns: number[];
+>ns : Symbol(ns, Decl(pipeOperatorArrayErrors.ts, 21, 13))
+
+declare const ss: string[];
+>ss : Symbol(ss, Decl(pipeOperatorArrayErrors.ts, 22, 13))
+
+declare const bs: boolean[];
+>bs : Symbol(bs, Decl(pipeOperatorArrayErrors.ts, 23, 13))
+
+declare const us: unknown[];
+>us : Symbol(us, Decl(pipeOperatorArrayErrors.ts, 24, 13))
+
+declare const mixed: (number | string)[];
+>mixed : Symbol(mixed, Decl(pipeOperatorArrayErrors.ts, 25, 13))
+
+...[...ss] |> numbers;
+>ss : Symbol(ss, Decl(pipeOperatorArrayErrors.ts, 22, 13))
+>numbers : Symbol(numbers, Decl(pipeOperatorArrayErrors.ts, 0, 0))
+
+...[...us] |> numbers;
+>us : Symbol(us, Decl(pipeOperatorArrayErrors.ts, 24, 13))
+>numbers : Symbol(numbers, Decl(pipeOperatorArrayErrors.ts, 0, 0))
+
+...[...mixed] |> heterogeneous;
+>mixed : Symbol(mixed, Decl(pipeOperatorArrayErrors.ts, 25, 13))
+>heterogeneous : Symbol(heterogeneous, Decl(pipeOperatorArrayErrors.ts, 13, 38))
+
+...[...ns, "tail"] |> heterogeneous;
+>ns : Symbol(ns, Decl(pipeOperatorArrayErrors.ts, 21, 13))
+>heterogeneous : Symbol(heterogeneous, Decl(pipeOperatorArrayErrors.ts, 13, 38))
+
+...[...ns, "tail"] |> tailCanBeEither;
+>ns : Symbol(ns, Decl(pipeOperatorArrayErrors.ts, 21, 13))
+>tailCanBeEither : Symbol(tailCanBeEither, Decl(pipeOperatorArrayErrors.ts, 14, 59))
+
+...[...ns, ...ss] |> heterogeneous;
+>ns : Symbol(ns, Decl(pipeOperatorArrayErrors.ts, 21, 13))
+>ss : Symbol(ss, Decl(pipeOperatorArrayErrors.ts, 22, 13))
+>heterogeneous : Symbol(heterogeneous, Decl(pipeOperatorArrayErrors.ts, 13, 38))
+
+...[...ns] |> stringRest;
+>ns : Symbol(ns, Decl(pipeOperatorArrayErrors.ts, 21, 13))
+>stringRest : Symbol(stringRest, Decl(pipeOperatorArrayErrors.ts, 15, 70))
+
+...[...ns] |> suffix;
+>ns : Symbol(ns, Decl(pipeOperatorArrayErrors.ts, 21, 13))
+>suffix : Symbol(suffix, Decl(pipeOperatorArrayErrors.ts, 16, 64))
+
+...[...ss] |> constrained;
+>ss : Symbol(ss, Decl(pipeOperatorArrayErrors.ts, 22, 13))
+>constrained : Symbol(constrained, Decl(pipeOperatorArrayErrors.ts, 19, 54))
+
+...[...bs] |> select;
+>bs : Symbol(bs, Decl(pipeOperatorArrayErrors.ts, 23, 13))
+>select : Symbol(select, Decl(pipeOperatorArrayErrors.ts, 17, 63), Decl(pipeOperatorArrayErrors.ts, 18, 54))
+
+...[1, 2, ...ns] |> one;
+>ns : Symbol(ns, Decl(pipeOperatorArrayErrors.ts, 21, 13))
+>one : Symbol(one, Decl(pipeOperatorArrayErrors.ts, 12, 53))
+
+const fixed = [1, 2] as const;
+>fixed : Symbol(fixed, Decl(pipeOperatorArrayErrors.ts, 38, 5))
+>const : Symbol(const)
+
+...[...fixed] |> one;
+>fixed : Symbol(fixed, Decl(pipeOperatorArrayErrors.ts, 38, 5))
+>one : Symbol(one, Decl(pipeOperatorArrayErrors.ts, 12, 53))
+
+ns |> one;
+>ns : Symbol(ns, Decl(pipeOperatorArrayErrors.ts, 21, 13))
+>one : Symbol(one, Decl(pipeOperatorArrayErrors.ts, 12, 53))
+
+numbers(...ns); // Ordinary calls retain TypeScript's spread restriction.
+>numbers : Symbol(numbers, Decl(pipeOperatorArrayErrors.ts, 0, 0))
+>ns : Symbol(ns, Decl(pipeOperatorArrayErrors.ts, 21, 13))
+

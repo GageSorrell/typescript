@@ -1,0 +1,95 @@
+pipeOperatorArrayErrors.ts(28,5): error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
+pipeOperatorArrayErrors.ts(29,5): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'number'.
+pipeOperatorArrayErrors.ts(30,5): error TS2345: Argument of type 'string | number' is not assignable to parameter of type 'number'.
+  Type 'string' is not assignable to type 'number'.
+pipeOperatorArrayErrors.ts(31,5): error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+pipeOperatorArrayErrors.ts(32,12): error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
+pipeOperatorArrayErrors.ts(33,5): error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+pipeOperatorArrayErrors.ts(34,5): error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+pipeOperatorArrayErrors.ts(35,5): error TS2345: Argument of type 'number' is not assignable to parameter of type 'boolean'.
+pipeOperatorArrayErrors.ts(36,5): error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
+pipeOperatorArrayErrors.ts(37,5): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Argument of type 'boolean' is not assignable to parameter of type 'string'.
+pipeOperatorArrayErrors.ts(38,8): error TS2554: Expected 1 arguments, but got 2.
+pipeOperatorArrayErrors.ts(40,5): error TS2554: Expected 1 arguments, but got 2.
+pipeOperatorArrayErrors.ts(41,1): error TS2345: Argument of type 'number[]' is not assignable to parameter of type 'number'.
+pipeOperatorArrayErrors.ts(42,9): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+
+
+==== pipeOperatorArrayErrors.ts (14 errors) ====
+    /**
+     *
+     *
+     * @module typescript-go/testdata/tests/cases/compiler/pipeOperatorArrayErrors
+     *
+     * @file      pipeOperatorArrayErrors.ts
+     * @author    Gage Sorrell <gage@sorrell.sh>
+     * @copyright (c) 2026 Gage Sorrell
+     * @license   MIT
+     */
+    
+    
+    declare function numbers(a: number, b: number): void;
+    declare function one(a: number): void;
+    declare function heterogeneous(a: number, b: string): void;
+    declare function tailCanBeEither(a: number, b: number | string): void;
+    declare function stringRest(a: number, ...rest: string[]): void;
+    declare function suffix(...args: [...number[], boolean]): void;
+    declare function select(a: number, b: number): number;
+    declare function select(a: string, b: string): string;
+    declare function constrained<T extends number>(a: T, b: T): T;
+    declare const ns: number[];
+    declare const ss: string[];
+    declare const bs: boolean[];
+    declare const us: unknown[];
+    declare const mixed: (number | string)[];
+    
+    ...[...ss] |> numbers;
+        ~~~~~
+!!! error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
+    ...[...us] |> numbers;
+        ~~~~~
+!!! error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'number'.
+    ...[...mixed] |> heterogeneous;
+        ~~~~~~~~
+!!! error TS2345: Argument of type 'string | number' is not assignable to parameter of type 'number'.
+!!! error TS2345:   Type 'string' is not assignable to type 'number'.
+    ...[...ns, "tail"] |> heterogeneous;
+        ~~~~~
+!!! error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+    ...[...ns, "tail"] |> tailCanBeEither;
+               ~~~~~~
+!!! error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
+    ...[...ns, ...ss] |> heterogeneous;
+        ~~~~~
+!!! error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+    ...[...ns] |> stringRest;
+        ~~~~~
+!!! error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+    ...[...ns] |> suffix;
+        ~~~~~
+!!! error TS2345: Argument of type 'number' is not assignable to parameter of type 'boolean'.
+    ...[...ss] |> constrained;
+        ~~~~~
+!!! error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
+    ...[...bs] |> select;
+        ~~~~~
+!!! error TS2769: No overload matches this call.
+!!! error TS2769:   The last overload gave the following error.
+!!! error TS2769:     Argument of type 'boolean' is not assignable to parameter of type 'string'.
+!!! related TS2771 pipeOperatorArrayErrors.ts:20:18: The last overload is declared here.
+    ...[1, 2, ...ns] |> one;
+           ~
+!!! error TS2554: Expected 1 arguments, but got 2.
+    const fixed = [1, 2] as const;
+    ...[...fixed] |> one;
+        ~~~~~~~~
+!!! error TS2554: Expected 1 arguments, but got 2.
+    ns |> one;
+    ~~
+!!! error TS2345: Argument of type 'number[]' is not assignable to parameter of type 'number'.
+    numbers(...ns); // Ordinary calls retain TypeScript's spread restriction.
+            ~~~~~
+!!! error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+    

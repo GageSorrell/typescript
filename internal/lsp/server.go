@@ -1107,7 +1107,7 @@ func (s *Server) handleInitialize(ctx context.Context, params *lsproto.Initializ
 				},
 			},
 			SignatureHelpProvider: &lsproto.SignatureHelpOptions{
-				TriggerCharacters:   &[]string{"(", ",", "<"},
+				TriggerCharacters:   &[]string{"(", ",", "<", ">"},
 				RetriggerCharacters: &[]string{")"},
 			},
 			DocumentFormattingProvider: &lsproto.BooleanOrDocumentFormattingOptions{

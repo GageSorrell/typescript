@@ -1,0 +1,24 @@
+// === Syntax and Semantic Diagnostics ===
+/pipeEditorDiagnostics.ts(5,1): error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
+/pipeEditorDiagnostics.ts(6,8): error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
+/pipeEditorDiagnostics.ts(7,5): error TS1109: Expression expected.
+/pipeEditorDiagnostics.ts(8,10): error TS1005: '|>' expected.
+
+
+==== /pipeEditorDiagnostics.ts (4 errors) ====
+    declare function twice(value: number): number;
+    declare function add(a: number, b: number): number;
+    const values = [1, 2];
+    const valid = ...[...values] |> add;
+    "bad" |> twice;
+    ~~~~~
+!!! error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
+    ...[1, "bad"] |> add;
+           ~~~~~
+!!! error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
+    1 |>;
+        ~
+!!! error TS1109: Expression expected.
+    ...[1, 2];
+             ~
+!!! error TS1005: '|>' expected.

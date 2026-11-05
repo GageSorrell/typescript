@@ -114,6 +114,7 @@ func (d *astDecoder) createChildrenNode(kind ast.Kind, data uint32, childIndices
 		ast.KindGreaterThanGreaterThanGreaterThanToken,
 		ast.KindAmpersandToken,
 		ast.KindBarToken,
+		ast.KindBarGreaterThanToken,
 		ast.KindCaretToken,
 		ast.KindExclamationToken,
 		ast.KindTildeToken,

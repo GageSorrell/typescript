@@ -1,0 +1,121 @@
+//// [tests/cases/compiler/pipeOperatorErrors.ts] ////
+
+=== pipeOperatorErrors.ts ===
+/**
+ *
+ *
+ * @module typescript-go/testdata/tests/cases/compiler/pipeOperatorErrors
+ *
+ * @file      pipeOperatorErrors.ts
+ * @author    Gage Sorrell <gage@sorrell.sh>
+ * @copyright (c) 2026 Gage Sorrell
+ * @license   MIT
+ */
+
+
+declare function stringOnly(value: string): void;
+>stringOnly : (value: string) => void
+>value : string
+
+declare function twoNumbers(a: number, b: number): void;
+>twoNumbers : (a: number, b: number) => void
+>a : number
+>b : number
+
+declare function oneNumber(a: number): void;
+>oneNumber : (a: number) => void
+>a : number
+
+declare function constrained<T extends string>(value: T): T;
+>constrained : <T extends string>(value: T) => T
+>value : T
+
+declare function overloaded(value: number): number;
+>overloaded : { (value: number): number; (value: string): string; }
+>value : number
+
+declare function overloaded(value: string): string;
+>overloaded : { (value: number): number; (value: string): string; }
+>value : string
+
+declare function needsThis(this: { value: string }, value: number): void;
+>needsThis : (this: { value: string; }, value: number) => void
+>this : { value: string; }
+>value : string
+>value : number
+
+declare const maybe: ((value: number) => number) | undefined;
+>maybe : ((value: number) => number) | undefined
+>value : number
+
+1 |> stringOnly;
+>1 |> stringOnly : void
+>1 : 1
+>stringOnly : (value: string) => void
+
+1 |> twoNumbers;
+>1 |> twoNumbers : void
+>1 : 1
+>twoNumbers : (a: number, b: number) => void
+
+...[] |> oneNumber;
+>...[] |> oneNumber : void
+>...[] : never
+>[] : never[]
+>oneNumber : (a: number) => void
+
+...[1, 2] |> oneNumber;
+>...[1, 2] |> oneNumber : void
+>...[1, 2] : number
+>[1, 2] : number[]
+>1 : 1
+>2 : 2
+>oneNumber : (a: number) => void
+
+[1, 2] |> oneNumber;
+>[1, 2] |> oneNumber : void
+>[1, 2] : number[]
+>1 : 1
+>2 : 2
+>oneNumber : (a: number) => void
+
+1 |> 2;
+>1 |> 2 : any
+>1 : 1
+>2 : 2
+
+1 |> maybe;
+>1 |> maybe : number
+>1 : 1
+>maybe : ((value: number) => number) | undefined
+
+1 |> constrained;
+>1 |> constrained : string
+>1 : 1
+>constrained : <T extends string>(value: T) => T
+
+true |> overloaded;
+>true |> overloaded : never
+>true : true
+>overloaded : { (value: number): number; (value: string): string; }
+
+1 |> needsThis;
+>1 |> needsThis : void
+>1 : 1
+>needsThis : (this: { value: string; }, value: number) => void
+
+// Unknown-length arrays are accepted by pipe calls.
+const values = [1, 2];
+>values : number[]
+>[1, 2] : number[]
+>1 : 1
+>2 : 2
+
+...[...values] |> twoNumbers;
+>...[...values] |> twoNumbers : void
+>...[...values] : number
+>[...values] : number[]
+>...values : number
+>values : number[]
+>twoNumbers : (a: number, b: number) => void
+

@@ -1,0 +1,17 @@
+// === goToDefinition ===
+// === /pipeEditorNavigation.ts ===
+// declare function select(value: number): number;
+// <|declare function [|select|](value: string): string;|>
+// const obj = { method(value: number) { return value; } };
+// "x" |> /*GOTO DEF*/select;
+// 1 |> (obj.method);
+
+
+
+// === goToDefinition ===
+// === /pipeEditorNavigation.ts ===
+// declare function select(value: number): number;
+// declare function select(value: string): string;
+// const obj = { <|[|method|](value: number) { return value; }|> };
+// "x" |> select;
+// 1 |> (obj./*GOTO DEF*/method);

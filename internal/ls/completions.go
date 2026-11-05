@@ -4851,7 +4851,10 @@ type argumentInfoForCompletions struct {
 
 func getArgumentInfoForCompletions(node *ast.Node, position int, file *ast.SourceFile, typeChecker *checker.Checker) *argumentInfoForCompletions {
 	info := getImmediatelyContainingArgumentInfo(node, position, file, typeChecker)
-	if info == nil || info.isTypeParameterList || info.invocation.callInvocation == nil {
+	if info == nil || info.isTypeParameterList || info.invocation.callInvocation == nil || info.argumentIndex < 0 {
+		return nil
+	}
+	if ast.IsPipeExpression(info.invocation.callInvocation.node) && position > info.invocation.callInvocation.node.AsBinaryExpression().Left.End() {
 		return nil
 	}
 	return &argumentInfoForCompletions{

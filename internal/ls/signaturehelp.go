@@ -67,8 +67,11 @@ func (l *LanguageService) GetSignatureHelpItems(
 	// Decide whether to show signature help
 	startingToken := astnav.FindPrecedingToken(sourceFile, position)
 	if startingToken == nil {
-		// We are at the beginning of the file
-		return nil
+		// A manually invoked pipe signature may start at the first source token.
+		startingToken = astnav.GetTokenAtPosition(sourceFile, position)
+		if startingToken == nil || ast.FindAncestor(startingToken, ast.IsPipeExpression) == nil {
+			return nil
+		}
 	}
 
 	type signatureHelpTriggerReasonKind int32
@@ -117,6 +120,17 @@ func (l *LanguageService) GetSignatureHelpItems(
 
 	isManuallyInvoked := triggerReasonKind == signatureHelpTriggerReasonKindInvoked
 	argumentInfo := getContainingArgumentInfo(startingToken, sourceFile, typeChecker, isManuallyInvoked, position)
+	if argumentInfo == nil && !onlyUseSyntacticOwners {
+		// A pipe has no opening parenthesis before its first input. At that
+		// boundary the preceding token can belong to an unrelated statement.
+		current := astnav.GetTokenAtPosition(sourceFile, position)
+		if current != nil {
+			info := getContainingArgumentInfo(current, sourceFile, typeChecker, isManuallyInvoked, position)
+			if info != nil && info.invocation.callInvocation != nil && ast.IsPipeExpression(info.invocation.callInvocation.node) {
+				argumentInfo = info
+			}
+		}
+	}
 	if argumentInfo == nil {
 		return nil
 	}
@@ -403,6 +417,12 @@ func (l *LanguageService) computeActiveParameter(sig signatureInformation, argum
 	if paramCount == 0 {
 		// No parameters, return nil (omit the field)
 		return nil
+	}
+	if argumentIndex < 0 {
+		if supportsNull {
+			return &lsproto.UintegerOrNull{}
+		}
+		return &lsproto.UintegerOrNull{Uinteger: new(uint32(paramCount))}
 	}
 
 	activeParam := uint32(argumentIndex)
@@ -808,6 +828,10 @@ func getCandidateOrTypeInfo(info *argumentListInfo, c *checker.Checker, sourceFi
 }
 
 func isSyntacticOwner(startingToken *ast.Node, node *ast.CallLikeExpression, sourceFile *ast.SourceFile) bool {
+	if ast.IsPipeExpression(node) {
+		return startingToken.Kind == ast.KindBarGreaterThanToken && startingToken.Parent == node ||
+			startingToken.Kind == ast.KindCommaToken && ast.IsArrayLiteralExpression(startingToken.Parent) && startingToken.Parent.Parent == node.AsBinaryExpression().Left
+	}
 	if !ast.IsCallOrNewExpression(node) {
 		return false
 	}
@@ -884,6 +908,9 @@ func getContainingArgumentInfo(node *ast.Node, sourceFile *ast.SourceFile, check
 }
 
 func getImmediatelyContainingArgumentOrContextualParameterInfo(node *ast.Node, position int, sourceFile *ast.SourceFile, checker *checker.Checker) *argumentListInfo {
+	if info := getPipeArgumentListInfo(node, position, checker); info != nil {
+		return info
+	}
 	result := tryGetParameterInfo(node, sourceFile, checker)
 	if result == nil {
 		return getImmediatelyContainingArgumentInfo(node, position, sourceFile, checker)
@@ -903,6 +930,9 @@ type argumentListInfo struct {
 // Returns relevant information for the argument list and the current argument if we are
 // in the argument of an invocation; returns undefined otherwise.
 func getImmediatelyContainingArgumentInfo(node *ast.Node, position int, sourceFile *ast.SourceFile, c *checker.Checker) *argumentListInfo {
+	if info := getPipeArgumentListInfo(node, position, c); info != nil {
+		return info
+	}
 	parent := node.Parent
 	if ast.IsCallOrNewExpression(parent) {
 		// There are 3 cases to handle:

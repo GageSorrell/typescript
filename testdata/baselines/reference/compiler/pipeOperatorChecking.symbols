@@ -1,0 +1,192 @@
+//// [tests/cases/compiler/pipeOperatorChecking.ts] ////
+
+=== pipeOperatorChecking.ts ===
+/**
+ *
+ *
+ * @module typescript-go/testdata/tests/cases/compiler/pipeOperatorChecking
+ *
+ * @file      pipeOperatorChecking.ts
+ * @author    Gage Sorrell <gage@sorrell.sh>
+ * @copyright (c) 2026 Gage Sorrell
+ * @license   MIT
+ */
+
+
+declare function identity<T>(value: T): T;
+>identity : Symbol(identity, Decl(pipeOperatorChecking.ts, 0, 0))
+>T : Symbol(T, Decl(pipeOperatorChecking.ts, 12, 26))
+>value : Symbol(value, Decl(pipeOperatorChecking.ts, 12, 29))
+>T : Symbol(T, Decl(pipeOperatorChecking.ts, 12, 26))
+>T : Symbol(T, Decl(pipeOperatorChecking.ts, 12, 26))
+
+declare function box<T>(value: T): { value: T };
+>box : Symbol(box, Decl(pipeOperatorChecking.ts, 12, 42))
+>T : Symbol(T, Decl(pipeOperatorChecking.ts, 13, 21))
+>value : Symbol(value, Decl(pipeOperatorChecking.ts, 13, 24))
+>T : Symbol(T, Decl(pipeOperatorChecking.ts, 13, 21))
+>value : Symbol(value, Decl(pipeOperatorChecking.ts, 13, 36))
+>T : Symbol(T, Decl(pipeOperatorChecking.ts, 13, 21))
+
+declare function count(value: string): number;
+>count : Symbol(count, Decl(pipeOperatorChecking.ts, 13, 48))
+>value : Symbol(value, Decl(pipeOperatorChecking.ts, 14, 23))
+
+declare function select(value: number): number;
+>select : Symbol(select, Decl(pipeOperatorChecking.ts, 14, 46), Decl(pipeOperatorChecking.ts, 15, 47))
+>value : Symbol(value, Decl(pipeOperatorChecking.ts, 15, 24))
+
+declare function select(value: string): string;
+>select : Symbol(select, Decl(pipeOperatorChecking.ts, 14, 46), Decl(pipeOperatorChecking.ts, 15, 47))
+>value : Symbol(value, Decl(pipeOperatorChecking.ts, 16, 24))
+
+declare function pair(a: number, b: string): { a: number; b: string };
+>pair : Symbol(pair, Decl(pipeOperatorChecking.ts, 16, 47))
+>a : Symbol(a, Decl(pipeOperatorChecking.ts, 17, 22))
+>b : Symbol(b, Decl(pipeOperatorChecking.ts, 17, 32))
+>a : Symbol(a, Decl(pipeOperatorChecking.ts, 17, 46))
+>b : Symbol(b, Decl(pipeOperatorChecking.ts, 17, 57))
+
+declare function optional(a: number, b?: string): number;
+>optional : Symbol(optional, Decl(pipeOperatorChecking.ts, 17, 70))
+>a : Symbol(a, Decl(pipeOperatorChecking.ts, 18, 26))
+>b : Symbol(b, Decl(pipeOperatorChecking.ts, 18, 36))
+
+declare function rest(a: number, ...values: string[]): string[];
+>rest : Symbol(rest, Decl(pipeOperatorChecking.ts, 18, 57))
+>a : Symbol(a, Decl(pipeOperatorChecking.ts, 19, 22))
+>values : Symbol(values, Decl(pipeOperatorChecking.ts, 19, 32))
+
+declare function useCallback(callback: (value: string) => number): number;
+>useCallback : Symbol(useCallback, Decl(pipeOperatorChecking.ts, 19, 64))
+>callback : Symbol(callback, Decl(pipeOperatorChecking.ts, 20, 29))
+>value : Symbol(value, Decl(pipeOperatorChecking.ts, 20, 40))
+
+declare function apply(callback: (value: string) => number, value: string): number;
+>apply : Symbol(apply, Decl(pipeOperatorChecking.ts, 20, 74))
+>callback : Symbol(callback, Decl(pipeOperatorChecking.ts, 21, 23))
+>value : Symbol(value, Decl(pipeOperatorChecking.ts, 21, 34))
+>value : Symbol(value, Decl(pipeOperatorChecking.ts, 21, 59))
+
+declare function factory(): (value: number) => string;
+>factory : Symbol(factory, Decl(pipeOperatorChecking.ts, 21, 83))
+>value : Symbol(value, Decl(pipeOperatorChecking.ts, 22, 29))
+
+const chained = "hello" |> count |> identity |> box;
+>chained : Symbol(chained, Decl(pipeOperatorChecking.ts, 24, 5))
+>count : Symbol(count, Decl(pipeOperatorChecking.ts, 13, 48))
+>identity : Symbol(identity, Decl(pipeOperatorChecking.ts, 0, 0))
+>box : Symbol(box, Decl(pipeOperatorChecking.ts, 12, 42))
+
+const selectedNumber = 1 |> select;
+>selectedNumber : Symbol(selectedNumber, Decl(pipeOperatorChecking.ts, 25, 5))
+>select : Symbol(select, Decl(pipeOperatorChecking.ts, 14, 46), Decl(pipeOperatorChecking.ts, 15, 47))
+
+const selectedString = "x" |> select;
+>selectedString : Symbol(selectedString, Decl(pipeOperatorChecking.ts, 26, 5))
+>select : Symbol(select, Decl(pipeOperatorChecking.ts, 14, 46), Decl(pipeOperatorChecking.ts, 15, 47))
+
+const unpacked = ...[1, "x"] |> pair;
+>unpacked : Symbol(unpacked, Decl(pipeOperatorChecking.ts, 27, 5))
+>pair : Symbol(pair, Decl(pipeOperatorChecking.ts, 16, 47))
+
+const tuple = [1, "x"] as const;
+>tuple : Symbol(tuple, Decl(pipeOperatorChecking.ts, 28, 5))
+>const : Symbol(const)
+
+const unpackedTuple = ...[...tuple] |> pair;
+>unpackedTuple : Symbol(unpackedTuple, Decl(pipeOperatorChecking.ts, 29, 5))
+>tuple : Symbol(tuple, Decl(pipeOperatorChecking.ts, 28, 5))
+>pair : Symbol(pair, Decl(pipeOperatorChecking.ts, 16, 47))
+
+const optionalArgument = ...[1] |> optional;
+>optionalArgument : Symbol(optionalArgument, Decl(pipeOperatorChecking.ts, 30, 5))
+>optional : Symbol(optional, Decl(pipeOperatorChecking.ts, 17, 70))
+
+const restArguments = ...[1, "a", "b"] |> rest;
+>restArguments : Symbol(restArguments, Decl(pipeOperatorChecking.ts, 31, 5))
+>rest : Symbol(rest, Decl(pipeOperatorChecking.ts, 18, 57))
+
+const callback = (value => value.length) |> useCallback;
+>callback : Symbol(callback, Decl(pipeOperatorChecking.ts, 32, 5))
+>value : Symbol(value, Decl(pipeOperatorChecking.ts, 32, 18))
+>value.length : Symbol(String.length, Decl(lib.es5.d.ts, --, --))
+>value : Symbol(value, Decl(pipeOperatorChecking.ts, 32, 18))
+>length : Symbol(String.length, Decl(lib.es5.d.ts, --, --))
+>useCallback : Symbol(useCallback, Decl(pipeOperatorChecking.ts, 19, 64))
+
+const unpackedCallback = ...[value => value.length, "x"] |> apply;
+>unpackedCallback : Symbol(unpackedCallback, Decl(pipeOperatorChecking.ts, 33, 5))
+>value : Symbol(value, Decl(pipeOperatorChecking.ts, 33, 29))
+>value.length : Symbol(String.length, Decl(lib.es5.d.ts, --, --))
+>value : Symbol(value, Decl(pipeOperatorChecking.ts, 33, 29))
+>length : Symbol(String.length, Decl(lib.es5.d.ts, --, --))
+>apply : Symbol(apply, Decl(pipeOperatorChecking.ts, 20, 74))
+
+const inline = 1 |> (value => value.toFixed());
+>inline : Symbol(inline, Decl(pipeOperatorChecking.ts, 34, 5))
+>value : Symbol(value, Decl(pipeOperatorChecking.ts, 34, 21))
+>value.toFixed : Symbol(Number.toFixed, Decl(lib.es5.d.ts, --, --))
+>value : Symbol(value, Decl(pipeOperatorChecking.ts, 34, 21))
+>toFixed : Symbol(Number.toFixed, Decl(lib.es5.d.ts, --, --))
+
+const inlineMany = ...[1, "x"] |> ((n, s) => n.toFixed() + s.toUpperCase());
+>inlineMany : Symbol(inlineMany, Decl(pipeOperatorChecking.ts, 35, 5))
+>n : Symbol(n, Decl(pipeOperatorChecking.ts, 35, 36))
+>s : Symbol(s, Decl(pipeOperatorChecking.ts, 35, 38))
+>n.toFixed : Symbol(Number.toFixed, Decl(lib.es5.d.ts, --, --))
+>n : Symbol(n, Decl(pipeOperatorChecking.ts, 35, 36))
+>toFixed : Symbol(Number.toFixed, Decl(lib.es5.d.ts, --, --))
+>s.toUpperCase : Symbol(String.toUpperCase, Decl(lib.es5.d.ts, --, --))
+>s : Symbol(s, Decl(pipeOperatorChecking.ts, 35, 38))
+>toUpperCase : Symbol(String.toUpperCase, Decl(lib.es5.d.ts, --, --))
+
+const factoryCall = 1 |> factory();
+>factoryCall : Symbol(factoryCall, Decl(pipeOperatorChecking.ts, 36, 5))
+>factory : Symbol(factory, Decl(pipeOperatorChecking.ts, 21, 83))
+
+const instantiated = "x" |> identity<string>;
+>instantiated : Symbol(instantiated, Decl(pipeOperatorChecking.ts, 37, 5))
+>identity : Symbol(identity, Decl(pipeOperatorChecking.ts, 0, 0))
+
+const object = {
+>object : Symbol(object, Decl(pipeOperatorChecking.ts, 38, 5))
+
+    prefix: "value=",
+>prefix : Symbol(prefix, Decl(pipeOperatorChecking.ts, 38, 16))
+
+    method(this: { prefix: string }, value: number) { return this.prefix + value; },
+>method : Symbol(method, Decl(pipeOperatorChecking.ts, 39, 21))
+>this : Symbol(this, Decl(pipeOperatorChecking.ts, 40, 11))
+>prefix : Symbol(prefix, Decl(pipeOperatorChecking.ts, 40, 18))
+>value : Symbol(value, Decl(pipeOperatorChecking.ts, 40, 36))
+>this.prefix : Symbol(prefix, Decl(pipeOperatorChecking.ts, 40, 18))
+>this : Symbol(this, Decl(pipeOperatorChecking.ts, 40, 11))
+>prefix : Symbol(prefix, Decl(pipeOperatorChecking.ts, 40, 18))
+>value : Symbol(value, Decl(pipeOperatorChecking.ts, 40, 36))
+
+};
+const receiver = 1 |> object.method;
+>receiver : Symbol(receiver, Decl(pipeOperatorChecking.ts, 42, 5))
+>object.method : Symbol(method, Decl(pipeOperatorChecking.ts, 39, 21))
+>object : Symbol(object, Decl(pipeOperatorChecking.ts, 38, 5))
+>method : Symbol(method, Decl(pipeOperatorChecking.ts, 39, 21))
+
+const parenthesizedReceiver = 1 |> (object.method);
+>parenthesizedReceiver : Symbol(parenthesizedReceiver, Decl(pipeOperatorChecking.ts, 43, 5))
+>object.method : Symbol(method, Decl(pipeOperatorChecking.ts, 39, 21))
+>object : Symbol(object, Decl(pipeOperatorChecking.ts, 38, 5))
+>method : Symbol(method, Decl(pipeOperatorChecking.ts, 39, 21))
+
+const values = [];
+>values : Symbol(values, Decl(pipeOperatorChecking.ts, 44, 5))
+
+1 |> values.push;
+>values.push : Symbol(Array.push, Decl(lib.es5.d.ts, --, --))
+>values : Symbol(values, Decl(pipeOperatorChecking.ts, 44, 5))
+>push : Symbol(Array.push, Decl(lib.es5.d.ts, --, --))
+
+const evolved = values;
+>evolved : Symbol(evolved, Decl(pipeOperatorChecking.ts, 46, 5))
+>values : Symbol(values, Decl(pipeOperatorChecking.ts, 44, 5))
+

@@ -21,6 +21,7 @@ import {
 } from "./node.infrastructure.ts";
 import {
     HEADER_OFFSET_EXTENDED_DATA,
+    HEADER_OFFSET_METADATA,
     HEADER_OFFSET_NODES,
     HEADER_OFFSET_STRING_TABLE,
     HEADER_OFFSET_STRING_TABLE_OFFSETS,
@@ -29,6 +30,7 @@ import {
     NODE_LEN,
     NODE_OFFSET_KIND,
     NODE_OFFSET_PARENT,
+    PROTOCOL_VERSION,
 } from "./protocol.ts";
 import { Wtf8Decoder } from "./wtf8.ts";
 
@@ -62,6 +64,10 @@ export class RemoteSourceFile extends RemoteNode implements SourceFileInfo {
 
     constructor(data: Uint8Array, decoder: TextDecoder, timing?: TimingCollector) {
         const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
+        const version = view.getUint8(HEADER_OFFSET_METADATA + 3);
+        if (version !== PROTOCOL_VERSION) {
+            throw new Error(`Unsupported protocol version ${version} (expected ${PROTOCOL_VERSION}); use the matching forked compiler and API package.`);
+        }
         const offsetNodes = view.getUint32(HEADER_OFFSET_NODES, true);
         super(view, 1, undefined!, undefined!, offsetNodes);
         this._sourceFile = this;

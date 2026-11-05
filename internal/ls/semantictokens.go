@@ -198,6 +198,9 @@ func (l *LanguageService) collectSemanticTokensInRange(ctx context.Context, c *c
 		if node.Flags&ast.NodeFlagsReparsed != 0 {
 			return false
 		}
+		if node.Kind == ast.KindBarGreaterThanToken {
+			tokens = append(tokens, semanticToken{node: node, tokenType: tokenTypeOperator})
+		}
 		nodeEnd := node.End()
 		if node.Pos() >= spanEnd || nodeEnd <= spanStart {
 			return false
@@ -468,7 +471,7 @@ func isExpressionInCallExpression(node *ast.Node) bool {
 		node = node.Parent
 	}
 	parent := node.Parent
-	return parent != nil && ast.IsCallExpression(parent) && parent.Expression() == node
+	return parent != nil && ast.IsCallExpression(parent) && parent.Expression() == node || getPipeInvocationOfTarget(node) != nil
 }
 
 func isInfinityOrNaNString(text string) bool {

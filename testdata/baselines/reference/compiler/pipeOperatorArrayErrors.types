@@ -1,0 +1,193 @@
+//// [tests/cases/compiler/pipeOperatorArrayErrors.ts] ////
+
+=== pipeOperatorArrayErrors.ts ===
+/**
+ *
+ *
+ * @module typescript-go/testdata/tests/cases/compiler/pipeOperatorArrayErrors
+ *
+ * @file      pipeOperatorArrayErrors.ts
+ * @author    Gage Sorrell <gage@sorrell.sh>
+ * @copyright (c) 2026 Gage Sorrell
+ * @license   MIT
+ */
+
+
+declare function numbers(a: number, b: number): void;
+>numbers : (a: number, b: number) => void
+>a : number
+>b : number
+
+declare function one(a: number): void;
+>one : (a: number) => void
+>a : number
+
+declare function heterogeneous(a: number, b: string): void;
+>heterogeneous : (a: number, b: string) => void
+>a : number
+>b : string
+
+declare function tailCanBeEither(a: number, b: number | string): void;
+>tailCanBeEither : (a: number, b: number | string) => void
+>a : number
+>b : string | number
+
+declare function stringRest(a: number, ...rest: string[]): void;
+>stringRest : (a: number, ...rest: string[]) => void
+>a : number
+>rest : string[]
+
+declare function suffix(...args: [...number[], boolean]): void;
+>suffix : (...args: [...number[], boolean]) => void
+>args : [...number[], boolean]
+
+declare function select(a: number, b: number): number;
+>select : { (a: number, b: number): number; (a: string, b: string): string; }
+>a : number
+>b : number
+
+declare function select(a: string, b: string): string;
+>select : { (a: number, b: number): number; (a: string, b: string): string; }
+>a : string
+>b : string
+
+declare function constrained<T extends number>(a: T, b: T): T;
+>constrained : <T extends number>(a: T, b: T) => T
+>a : T
+>b : T
+
+declare const ns: number[];
+>ns : number[]
+
+declare const ss: string[];
+>ss : string[]
+
+declare const bs: boolean[];
+>bs : boolean[]
+
+declare const us: unknown[];
+>us : unknown[]
+
+declare const mixed: (number | string)[];
+>mixed : (string | number)[]
+
+...[...ss] |> numbers;
+>...[...ss] |> numbers : void
+>...[...ss] : string
+>[...ss] : string[]
+>...ss : string
+>ss : string[]
+>numbers : (a: number, b: number) => void
+
+...[...us] |> numbers;
+>...[...us] |> numbers : void
+>...[...us] : unknown
+>[...us] : unknown[]
+>...us : unknown
+>us : unknown[]
+>numbers : (a: number, b: number) => void
+
+...[...mixed] |> heterogeneous;
+>...[...mixed] |> heterogeneous : void
+>...[...mixed] : string | number
+>[...mixed] : (string | number)[]
+>...mixed : string | number
+>mixed : (string | number)[]
+>heterogeneous : (a: number, b: string) => void
+
+...[...ns, "tail"] |> heterogeneous;
+>...[...ns, "tail"] |> heterogeneous : void
+>...[...ns, "tail"] : string | number
+>[...ns, "tail"] : (string | number)[]
+>...ns : number
+>ns : number[]
+>"tail" : "tail"
+>heterogeneous : (a: number, b: string) => void
+
+...[...ns, "tail"] |> tailCanBeEither;
+>...[...ns, "tail"] |> tailCanBeEither : void
+>...[...ns, "tail"] : string | number
+>[...ns, "tail"] : (string | number)[]
+>...ns : number
+>ns : number[]
+>"tail" : "tail"
+>tailCanBeEither : (a: number, b: number | string) => void
+
+...[...ns, ...ss] |> heterogeneous;
+>...[...ns, ...ss] |> heterogeneous : void
+>...[...ns, ...ss] : string | number
+>[...ns, ...ss] : (string | number)[]
+>...ns : number
+>ns : number[]
+>...ss : string
+>ss : string[]
+>heterogeneous : (a: number, b: string) => void
+
+...[...ns] |> stringRest;
+>...[...ns] |> stringRest : void
+>...[...ns] : number
+>[...ns] : number[]
+>...ns : number
+>ns : number[]
+>stringRest : (a: number, ...rest: string[]) => void
+
+...[...ns] |> suffix;
+>...[...ns] |> suffix : void
+>...[...ns] : number
+>[...ns] : number[]
+>...ns : number
+>ns : number[]
+>suffix : (...args: [...number[], boolean]) => void
+
+...[...ss] |> constrained;
+>...[...ss] |> constrained : number
+>...[...ss] : string
+>[...ss] : string[]
+>...ss : string
+>ss : string[]
+>constrained : <T extends number>(a: T, b: T) => T
+
+...[...bs] |> select;
+>...[...bs] |> select : never
+>...[...bs] : boolean
+>[...bs] : boolean[]
+>...bs : boolean
+>bs : boolean[]
+>select : { (a: number, b: number): number; (a: string, b: string): string; }
+
+...[1, 2, ...ns] |> one;
+>...[1, 2, ...ns] |> one : void
+>...[1, 2, ...ns] : number
+>[1, 2, ...ns] : number[]
+>1 : 1
+>2 : 2
+>...ns : number
+>ns : number[]
+>one : (a: number) => void
+
+const fixed = [1, 2] as const;
+>fixed : readonly [1, 2]
+>[1, 2] as const : readonly [1, 2]
+>[1, 2] : readonly [1, 2]
+>1 : 1
+>2 : 2
+
+...[...fixed] |> one;
+>...[...fixed] |> one : void
+>...[...fixed] : 1 | 2
+>[...fixed] : (1 | 2)[]
+>...fixed : 1 | 2
+>fixed : readonly [1, 2]
+>one : (a: number) => void
+
+ns |> one;
+>ns |> one : void
+>ns : number[]
+>one : (a: number) => void
+
+numbers(...ns); // Ordinary calls retain TypeScript's spread restriction.
+>numbers(...ns) : void
+>numbers : (a: number, b: number) => void
+>...ns : number
+>ns : number[]
+

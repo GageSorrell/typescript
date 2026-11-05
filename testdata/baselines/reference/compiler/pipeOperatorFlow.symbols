@@ -1,0 +1,216 @@
+//// [tests/cases/compiler/pipeOperatorFlow.ts] ////
+
+=== pipeOperatorFlow.ts ===
+/**
+ *
+ *
+ * @module typescript-go/testdata/tests/cases/compiler/pipeOperatorFlow
+ *
+ * @file      pipeOperatorFlow.ts
+ * @author    Gage Sorrell <gage@sorrell.sh>
+ * @copyright (c) 2026 Gage Sorrell
+ * @license   MIT
+ */
+
+
+declare function isString(value: unknown): value is string;
+>isString : Symbol(isString, Decl(pipeOperatorFlow.ts, 0, 0))
+>value : Symbol(value, Decl(pipeOperatorFlow.ts, 12, 26))
+>value : Symbol(value, Decl(pipeOperatorFlow.ts, 12, 26))
+
+declare function taggedString(tag: number, value: unknown): value is string;
+>taggedString : Symbol(taggedString, Decl(pipeOperatorFlow.ts, 12, 59))
+>tag : Symbol(tag, Decl(pipeOperatorFlow.ts, 13, 30))
+>value : Symbol(value, Decl(pipeOperatorFlow.ts, 13, 42))
+>value : Symbol(value, Decl(pipeOperatorFlow.ts, 13, 42))
+
+declare function assertString(value: unknown): asserts value is string;
+>assertString : Symbol(assertString, Decl(pipeOperatorFlow.ts, 13, 76))
+>value : Symbol(value, Decl(pipeOperatorFlow.ts, 14, 30))
+>value : Symbol(value, Decl(pipeOperatorFlow.ts, 14, 30))
+
+declare function assert(value: unknown): asserts value;
+>assert : Symbol(assert, Decl(pipeOperatorFlow.ts, 14, 71))
+>value : Symbol(value, Decl(pipeOperatorFlow.ts, 15, 24))
+>value : Symbol(value, Decl(pipeOperatorFlow.ts, 15, 24))
+
+declare function fail(value: unknown): never;
+>fail : Symbol(fail, Decl(pipeOperatorFlow.ts, 15, 55))
+>value : Symbol(value, Decl(pipeOperatorFlow.ts, 16, 22))
+
+function predicate(value: string | number) {
+>predicate : Symbol(predicate, Decl(pipeOperatorFlow.ts, 16, 45))
+>value : Symbol(value, Decl(pipeOperatorFlow.ts, 18, 19))
+
+    if (value |> isString) {
+>value : Symbol(value, Decl(pipeOperatorFlow.ts, 18, 19))
+>isString : Symbol(isString, Decl(pipeOperatorFlow.ts, 0, 0))
+
+        const text: string = value;
+>text : Symbol(text, Decl(pipeOperatorFlow.ts, 20, 13))
+>value : Symbol(value, Decl(pipeOperatorFlow.ts, 18, 19))
+
+    } else {
+        const count: number = value;
+>count : Symbol(count, Decl(pipeOperatorFlow.ts, 22, 13))
+>value : Symbol(value, Decl(pipeOperatorFlow.ts, 18, 19))
+    }
+}
+function unpackedPredicate(value: unknown) {
+>unpackedPredicate : Symbol(unpackedPredicate, Decl(pipeOperatorFlow.ts, 24, 1))
+>value : Symbol(value, Decl(pipeOperatorFlow.ts, 25, 27))
+
+    if (...[1, value] |> taggedString) {
+>value : Symbol(value, Decl(pipeOperatorFlow.ts, 25, 27))
+>taggedString : Symbol(taggedString, Decl(pipeOperatorFlow.ts, 12, 59))
+
+        const text: string = value;
+>text : Symbol(text, Decl(pipeOperatorFlow.ts, 27, 13))
+>value : Symbol(value, Decl(pipeOperatorFlow.ts, 25, 27))
+    }
+}
+function assertion(value: unknown) {
+>assertion : Symbol(assertion, Decl(pipeOperatorFlow.ts, 29, 1))
+>value : Symbol(value, Decl(pipeOperatorFlow.ts, 30, 19))
+
+    value |> assertString;
+>value : Symbol(value, Decl(pipeOperatorFlow.ts, 30, 19))
+>assertString : Symbol(assertString, Decl(pipeOperatorFlow.ts, 13, 76))
+
+    const text: string = value;
+>text : Symbol(text, Decl(pipeOperatorFlow.ts, 32, 9))
+>value : Symbol(value, Decl(pipeOperatorFlow.ts, 30, 19))
+}
+function truthy(value: string | undefined) {
+>truthy : Symbol(truthy, Decl(pipeOperatorFlow.ts, 33, 1))
+>value : Symbol(value, Decl(pipeOperatorFlow.ts, 34, 16))
+
+    value |> assert;
+>value : Symbol(value, Decl(pipeOperatorFlow.ts, 34, 16))
+>assert : Symbol(assert, Decl(pipeOperatorFlow.ts, 14, 71))
+
+    const text: string = value;
+>text : Symbol(text, Decl(pipeOperatorFlow.ts, 36, 9))
+>value : Symbol(value, Decl(pipeOperatorFlow.ts, 34, 16))
+}
+function neverReturns(value: unknown): string {
+>neverReturns : Symbol(neverReturns, Decl(pipeOperatorFlow.ts, 37, 1))
+>value : Symbol(value, Decl(pipeOperatorFlow.ts, 38, 22))
+
+    value |> fail;
+>value : Symbol(value, Decl(pipeOperatorFlow.ts, 38, 22))
+>fail : Symbol(fail, Decl(pipeOperatorFlow.ts, 15, 55))
+}
+function immediateEffects() {
+>immediateEffects : Symbol(immediateEffects, Decl(pipeOperatorFlow.ts, 40, 1))
+
+    let value: string | number = "x";
+>value : Symbol(value, Decl(pipeOperatorFlow.ts, 42, 7))
+
+    1 |> (_ => { value = 1; });
+>_ : Symbol(_, Decl(pipeOperatorFlow.ts, 43, 10))
+>value : Symbol(value, Decl(pipeOperatorFlow.ts, 42, 7))
+
+    const count: number = value;
+>count : Symbol(count, Decl(pipeOperatorFlow.ts, 44, 9))
+>value : Symbol(value, Decl(pipeOperatorFlow.ts, 42, 7))
+}
+function reassignedTarget() {
+>reassignedTarget : Symbol(reassignedTarget, Decl(pipeOperatorFlow.ts, 45, 1))
+
+    let fn: ((value: number) => number) | undefined;
+>fn : Symbol(fn, Decl(pipeOperatorFlow.ts, 47, 7))
+>value : Symbol(value, Decl(pipeOperatorFlow.ts, 47, 14))
+
+    return (fn = n => n + 1, 1) |> fn;
+>fn : Symbol(fn, Decl(pipeOperatorFlow.ts, 47, 7))
+>n : Symbol(n, Decl(pipeOperatorFlow.ts, 48, 16))
+>n : Symbol(n, Decl(pipeOperatorFlow.ts, 48, 16))
+>fn : Symbol(fn, Decl(pipeOperatorFlow.ts, 47, 7))
+}
+function stalePredicate(value: string | number) {
+>stalePredicate : Symbol(stalePredicate, Decl(pipeOperatorFlow.ts, 49, 1))
+>value : Symbol(value, Decl(pipeOperatorFlow.ts, 50, 24))
+
+    if (value |> (value = 1, isString)) {
+>value : Symbol(value, Decl(pipeOperatorFlow.ts, 50, 24))
+>value : Symbol(value, Decl(pipeOperatorFlow.ts, 50, 24))
+>isString : Symbol(isString, Decl(pipeOperatorFlow.ts, 0, 0))
+
+        const text: string = value; // Predicate describes the captured value.
+>text : Symbol(text, Decl(pipeOperatorFlow.ts, 52, 13))
+>value : Symbol(value, Decl(pipeOperatorFlow.ts, 50, 24))
+    }
+}
+
+declare function prefixedGuard(value: unknown, ...rest: unknown[]): value is string;
+>prefixedGuard : Symbol(prefixedGuard, Decl(pipeOperatorFlow.ts, 54, 1))
+>value : Symbol(value, Decl(pipeOperatorFlow.ts, 56, 31))
+>rest : Symbol(rest, Decl(pipeOperatorFlow.ts, 56, 46))
+>value : Symbol(value, Decl(pipeOperatorFlow.ts, 56, 31))
+
+declare function prefixedAssert(value: unknown, ...rest: unknown[]): asserts value;
+>prefixedAssert : Symbol(prefixedAssert, Decl(pipeOperatorFlow.ts, 56, 84))
+>value : Symbol(value, Decl(pipeOperatorFlow.ts, 57, 32))
+>rest : Symbol(rest, Decl(pipeOperatorFlow.ts, 57, 47))
+>value : Symbol(value, Decl(pipeOperatorFlow.ts, 57, 32))
+
+declare function shiftedGuard(tag: unknown, value: unknown): value is string;
+>shiftedGuard : Symbol(shiftedGuard, Decl(pipeOperatorFlow.ts, 57, 83))
+>tag : Symbol(tag, Decl(pipeOperatorFlow.ts, 58, 30))
+>value : Symbol(value, Decl(pipeOperatorFlow.ts, 58, 43))
+>value : Symbol(value, Decl(pipeOperatorFlow.ts, 58, 43))
+
+declare function shiftedAssert(tag: unknown, value: unknown): asserts value;
+>shiftedAssert : Symbol(shiftedAssert, Decl(pipeOperatorFlow.ts, 58, 77))
+>tag : Symbol(tag, Decl(pipeOperatorFlow.ts, 59, 31))
+>value : Symbol(value, Decl(pipeOperatorFlow.ts, 59, 44))
+>value : Symbol(value, Decl(pipeOperatorFlow.ts, 59, 44))
+
+function stableArrayPrefix(value: string | undefined, rest: unknown[]) {
+>stableArrayPrefix : Symbol(stableArrayPrefix, Decl(pipeOperatorFlow.ts, 59, 76))
+>value : Symbol(value, Decl(pipeOperatorFlow.ts, 60, 27))
+>rest : Symbol(rest, Decl(pipeOperatorFlow.ts, 60, 53))
+
+    if (...[value, ...rest] |> prefixedGuard) {
+>value : Symbol(value, Decl(pipeOperatorFlow.ts, 60, 27))
+>rest : Symbol(rest, Decl(pipeOperatorFlow.ts, 60, 53))
+>prefixedGuard : Symbol(prefixedGuard, Decl(pipeOperatorFlow.ts, 54, 1))
+
+        const text: string = value;
+>text : Symbol(text, Decl(pipeOperatorFlow.ts, 62, 13))
+>value : Symbol(value, Decl(pipeOperatorFlow.ts, 60, 27))
+    }
+    ...[value, ...rest] |> prefixedAssert;
+>value : Symbol(value, Decl(pipeOperatorFlow.ts, 60, 27))
+>rest : Symbol(rest, Decl(pipeOperatorFlow.ts, 60, 53))
+>prefixedAssert : Symbol(prefixedAssert, Decl(pipeOperatorFlow.ts, 56, 84))
+
+    const text: string = value;
+>text : Symbol(text, Decl(pipeOperatorFlow.ts, 65, 9))
+>value : Symbol(value, Decl(pipeOperatorFlow.ts, 60, 27))
+}
+function shiftedArraySuffix(value: string | undefined, rest: number[]) {
+>shiftedArraySuffix : Symbol(shiftedArraySuffix, Decl(pipeOperatorFlow.ts, 66, 1))
+>value : Symbol(value, Decl(pipeOperatorFlow.ts, 67, 28))
+>rest : Symbol(rest, Decl(pipeOperatorFlow.ts, 67, 54))
+
+    if (...[...rest, value] |> shiftedGuard) {
+>rest : Symbol(rest, Decl(pipeOperatorFlow.ts, 67, 54))
+>value : Symbol(value, Decl(pipeOperatorFlow.ts, 67, 28))
+>shiftedGuard : Symbol(shiftedGuard, Decl(pipeOperatorFlow.ts, 57, 83))
+
+        const text: string = value; // A variable-length spread can shift value.
+>text : Symbol(text, Decl(pipeOperatorFlow.ts, 69, 13))
+>value : Symbol(value, Decl(pipeOperatorFlow.ts, 67, 28))
+    }
+    ...[...rest, value] |> shiftedAssert;
+>rest : Symbol(rest, Decl(pipeOperatorFlow.ts, 67, 54))
+>value : Symbol(value, Decl(pipeOperatorFlow.ts, 67, 28))
+>shiftedAssert : Symbol(shiftedAssert, Decl(pipeOperatorFlow.ts, 58, 77))
+
+    const text: string = value; // The asserted parameter need not be value.
+>text : Symbol(text, Decl(pipeOperatorFlow.ts, 72, 9))
+>value : Symbol(value, Decl(pipeOperatorFlow.ts, 67, 28))
+}
+

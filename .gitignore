@@ -205,3 +205,10 @@ custom-gcl.hash
 !internal/fourslash/_scripts/manualTests.txt
 !internal/fourslash/_scripts/crashingTests.txt
 !internal/fourslash/_scripts/unparsedTests.txt
+
+# Beads / Dolt files (preserved from the initialized fork)
+.dolt/
+*.db
+.beads-credential-key
+.beads/proxieddb/
+*.gate.lock*

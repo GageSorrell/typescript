@@ -211,6 +211,7 @@ const textToToken = new Map(Object.entries({
     ">>>": SyntaxKind.GreaterThanGreaterThanGreaterThanToken,
     "&": SyntaxKind.AmpersandToken,
     "|": SyntaxKind.BarToken,
+    "|>": SyntaxKind.BarGreaterThanToken,
     "^": SyntaxKind.CaretToken,
     "!": SyntaxKind.ExclamationToken,
     "~": SyntaxKind.TildeToken,
@@ -1922,6 +1923,9 @@ export function createScanner(
                     }
                     if (charCodeUnchecked(pos + 1) === CharacterCodes.equals) {
                         return pos += 2, token = SyntaxKind.BarEqualsToken;
+                    }
+                    if (charCodeUnchecked(pos + 1) === CharacterCodes.greaterThan) {
+                        return pos += 2, token = SyntaxKind.BarGreaterThanToken;
                     }
                     pos++;
                     return token = SyntaxKind.BarToken;

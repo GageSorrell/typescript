@@ -1,0 +1,116 @@
+//// [tests/cases/compiler/pipeOperatorEmit.ts] ////
+
+=== pipeOperatorEmit.ts ===
+/**
+ *
+ *
+ * @module typescript-go/testdata/tests/cases/compiler/pipeOperatorEmit
+ *
+ * @file      pipeOperatorEmit.ts
+ * @author    Gage Sorrell <gage@sorrell.sh>
+ * @copyright (c) 2026 Gage Sorrell
+ * @license   MIT
+ */
+
+
+const twice = (n: number) => n * 2;
+>twice : Symbol(twice, Decl(pipeOperatorEmit.ts, 12, 5))
+>n : Symbol(n, Decl(pipeOperatorEmit.ts, 12, 15))
+>n : Symbol(n, Decl(pipeOperatorEmit.ts, 12, 15))
+
+const add = (a: number, b: number) => a + b;
+>add : Symbol(add, Decl(pipeOperatorEmit.ts, 13, 5))
+>a : Symbol(a, Decl(pipeOperatorEmit.ts, 13, 13))
+>b : Symbol(b, Decl(pipeOperatorEmit.ts, 13, 23))
+>a : Symbol(a, Decl(pipeOperatorEmit.ts, 13, 13))
+>b : Symbol(b, Decl(pipeOperatorEmit.ts, 13, 23))
+
+const values = [1, 2];
+>values : Symbol(values, Decl(pipeOperatorEmit.ts, 14, 5))
+
+const object = { offset: 10, method(n: number) { return this.offset + n; } };
+>object : Symbol(object, Decl(pipeOperatorEmit.ts, 15, 5))
+>offset : Symbol(offset, Decl(pipeOperatorEmit.ts, 15, 16))
+>method : Symbol(method, Decl(pipeOperatorEmit.ts, 15, 28))
+>n : Symbol(n, Decl(pipeOperatorEmit.ts, 15, 36))
+>this.offset : Symbol(offset, Decl(pipeOperatorEmit.ts, 15, 16))
+>this : Symbol(object, Decl(pipeOperatorEmit.ts, 15, 14))
+>offset : Symbol(offset, Decl(pipeOperatorEmit.ts, 15, 16))
+>n : Symbol(n, Decl(pipeOperatorEmit.ts, 15, 36))
+
+// Each input is captured before its target is evaluated.
+export const chained = 1 |> twice |> twice;
+>chained : Symbol(chained, Decl(pipeOperatorEmit.ts, 18, 12))
+>twice : Symbol(twice, Decl(pipeOperatorEmit.ts, 12, 5))
+>twice : Symbol(twice, Decl(pipeOperatorEmit.ts, 12, 5))
+
+export const explicit = ...[1, 2] |> add;
+>explicit : Symbol(explicit, Decl(pipeOperatorEmit.ts, 19, 12))
+>add : Symbol(add, Decl(pipeOperatorEmit.ts, 13, 5))
+
+export const expanded = ...[...values] |> add;
+>expanded : Symbol(expanded, Decl(pipeOperatorEmit.ts, 20, 12))
+>values : Symbol(values, Decl(pipeOperatorEmit.ts, 14, 5))
+>add : Symbol(add, Decl(pipeOperatorEmit.ts, 13, 5))
+
+export const member = 1 |> (object.method);
+>member : Symbol(member, Decl(pipeOperatorEmit.ts, 21, 12))
+>object.method : Symbol(method, Decl(pipeOperatorEmit.ts, 15, 28))
+>object : Symbol(object, Decl(pipeOperatorEmit.ts, 15, 5))
+>method : Symbol(method, Decl(pipeOperatorEmit.ts, 15, 28))
+
+export const computed = 1 |> object["method"];
+>computed : Symbol(computed, Decl(pipeOperatorEmit.ts, 22, 12))
+>object : Symbol(object, Decl(pipeOperatorEmit.ts, 15, 5))
+>"method" : Symbol(method, Decl(pipeOperatorEmit.ts, 15, 28))
+
+export const optional = 1 |> object?.method;
+>optional : Symbol(optional, Decl(pipeOperatorEmit.ts, 23, 12))
+>object?.method : Symbol(method, Decl(pipeOperatorEmit.ts, 15, 28))
+>object : Symbol(object, Decl(pipeOperatorEmit.ts, 15, 5))
+>method : Symbol(method, Decl(pipeOperatorEmit.ts, 15, 28))
+
+export const array = [1, 2] |> (items => items.length);
+>array : Symbol(array, Decl(pipeOperatorEmit.ts, 24, 12))
+>items : Symbol(items, Decl(pipeOperatorEmit.ts, 24, 32))
+>items.length : Symbol(Array.length, Decl(lib.es5.d.ts, --, --))
+>items : Symbol(items, Decl(pipeOperatorEmit.ts, 24, 32))
+>length : Symbol(Array.length, Decl(lib.es5.d.ts, --, --))
+
+export function defaulted(value = 1 |> twice) { return value; }
+>defaulted : Symbol(defaulted, Decl(pipeOperatorEmit.ts, 24, 55))
+>value : Symbol(value, Decl(pipeOperatorEmit.ts, 25, 26))
+>twice : Symbol(twice, Decl(pipeOperatorEmit.ts, 12, 5))
+>value : Symbol(value, Decl(pipeOperatorEmit.ts, 25, 26))
+
+export async function awaited() {
+>awaited : Symbol(awaited, Decl(pipeOperatorEmit.ts, 25, 63))
+
+    return (await Promise.resolve(1)) |> (await Promise.resolve(twice));
+>Promise.resolve : Symbol(PromiseConstructor.resolve, Decl(lib.es2015.promise.d.ts, --, --), Decl(lib.es2015.promise.d.ts, --, --), Decl(lib.es2015.promise.d.ts, --, --))
+>Promise : Symbol(Promise, Decl(lib.es5.d.ts, --, --), Decl(lib.es2015.iterable.d.ts, --, --), Decl(lib.es2015.promise.d.ts, --, --), Decl(lib.es2015.symbol.wellknown.d.ts, --, --))
+>resolve : Symbol(PromiseConstructor.resolve, Decl(lib.es2015.promise.d.ts, --, --), Decl(lib.es2015.promise.d.ts, --, --), Decl(lib.es2015.promise.d.ts, --, --))
+>Promise.resolve : Symbol(PromiseConstructor.resolve, Decl(lib.es2015.promise.d.ts, --, --), Decl(lib.es2015.promise.d.ts, --, --), Decl(lib.es2015.promise.d.ts, --, --))
+>Promise : Symbol(Promise, Decl(lib.es5.d.ts, --, --), Decl(lib.es2015.iterable.d.ts, --, --), Decl(lib.es2015.promise.d.ts, --, --), Decl(lib.es2015.symbol.wellknown.d.ts, --, --))
+>resolve : Symbol(PromiseConstructor.resolve, Decl(lib.es2015.promise.d.ts, --, --), Decl(lib.es2015.promise.d.ts, --, --), Decl(lib.es2015.promise.d.ts, --, --))
+>twice : Symbol(twice, Decl(pipeOperatorEmit.ts, 12, 5))
+}
+export function* yielded() {
+>yielded : Symbol(yielded, Decl(pipeOperatorEmit.ts, 28, 1))
+
+    return (yield 1) |> twice;
+>twice : Symbol(twice, Decl(pipeOperatorEmit.ts, 12, 5))
+}
+export class C {
+>C : Symbol(C, Decl(pipeOperatorEmit.ts, 31, 1))
+
+    value = 1 |> twice;
+>value : Symbol(C.value, Decl(pipeOperatorEmit.ts, 32, 16))
+>twice : Symbol(twice, Decl(pipeOperatorEmit.ts, 12, 5))
+
+    static value = ...[...values] |> add;
+>value : Symbol(C.value, Decl(pipeOperatorEmit.ts, 33, 23))
+>values : Symbol(values, Decl(pipeOperatorEmit.ts, 14, 5))
+>add : Symbol(add, Decl(pipeOperatorEmit.ts, 13, 5))
+}
+

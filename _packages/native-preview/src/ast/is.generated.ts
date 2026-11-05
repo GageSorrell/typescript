@@ -1566,6 +1566,7 @@ export function isCompoundAssignmentOperator(kind: SyntaxKind): kind is Compound
 
 export function isAssignmentOperatorOrHigher(kind: SyntaxKind): kind is AssignmentOperatorOrHigher {
     return kind === SyntaxKind.QuestionQuestionToken
+        || kind === SyntaxKind.BarGreaterThanToken
         || isLogicalOperatorOrHigher(kind)
         || isAssignmentOperator(kind);
 }

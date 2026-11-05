@@ -1,0 +1,252 @@
+//// [tests/cases/compiler/pipeOperatorFlow.ts] ////
+
+=== pipeOperatorFlow.ts ===
+/**
+ *
+ *
+ * @module typescript-go/testdata/tests/cases/compiler/pipeOperatorFlow
+ *
+ * @file      pipeOperatorFlow.ts
+ * @author    Gage Sorrell <gage@sorrell.sh>
+ * @copyright (c) 2026 Gage Sorrell
+ * @license   MIT
+ */
+
+
+declare function isString(value: unknown): value is string;
+>isString : (value: unknown) => value is string
+>value : unknown
+
+declare function taggedString(tag: number, value: unknown): value is string;
+>taggedString : (tag: number, value: unknown) => value is string
+>tag : number
+>value : unknown
+
+declare function assertString(value: unknown): asserts value is string;
+>assertString : (value: unknown) => asserts value is string
+>value : unknown
+
+declare function assert(value: unknown): asserts value;
+>assert : (value: unknown) => asserts value
+>value : unknown
+
+declare function fail(value: unknown): never;
+>fail : (value: unknown) => never
+>value : unknown
+
+function predicate(value: string | number) {
+>predicate : (value: string | number) => void
+>value : string | number
+
+    if (value |> isString) {
+>value |> isString : boolean
+>value : string | number
+>isString : (value: unknown) => value is string
+
+        const text: string = value;
+>text : string
+>value : string
+
+    } else {
+        const count: number = value;
+>count : number
+>value : number
+    }
+}
+function unpackedPredicate(value: unknown) {
+>unpackedPredicate : (value: unknown) => void
+>value : unknown
+
+    if (...[1, value] |> taggedString) {
+>...[1, value] |> taggedString : boolean
+>...[1, value] : unknown
+>[1, value] : unknown[]
+>1 : 1
+>value : unknown
+>taggedString : (tag: number, value: unknown) => value is string
+
+        const text: string = value;
+>text : string
+>value : string
+    }
+}
+function assertion(value: unknown) {
+>assertion : (value: unknown) => void
+>value : unknown
+
+    value |> assertString;
+>value |> assertString : void
+>value : unknown
+>assertString : (value: unknown) => asserts value is string
+
+    const text: string = value;
+>text : string
+>value : string
+}
+function truthy(value: string | undefined) {
+>truthy : (value: string | undefined) => void
+>value : string | undefined
+
+    value |> assert;
+>value |> assert : void
+>value : string | undefined
+>assert : (value: unknown) => asserts value
+
+    const text: string = value;
+>text : string
+>value : string
+}
+function neverReturns(value: unknown): string {
+>neverReturns : (value: unknown) => string
+>value : unknown
+
+    value |> fail;
+>value |> fail : never
+>value : unknown
+>fail : (value: unknown) => never
+}
+function immediateEffects() {
+>immediateEffects : () => void
+
+    let value: string | number = "x";
+>value : string | number
+>"x" : "x"
+
+    1 |> (_ => { value = 1; });
+>1 |> (_ => { value = 1; }) : void
+>1 : 1
+>(_ => { value = 1; }) : (_: number) => void
+>_ => { value = 1; } : (_: number) => void
+>_ : number
+>value = 1 : 1
+>value : string | number
+>1 : 1
+
+    const count: number = value;
+>count : number
+>value : number
+}
+function reassignedTarget() {
+>reassignedTarget : () => number
+
+    let fn: ((value: number) => number) | undefined;
+>fn : ((value: number) => number) | undefined
+>value : number
+
+    return (fn = n => n + 1, 1) |> fn;
+>(fn = n => n + 1, 1) |> fn : number
+>(fn = n => n + 1, 1) : 1
+>fn = n => n + 1, 1 : 1
+>fn = n => n + 1 : (n: number) => number
+>fn : ((value: number) => number) | undefined
+>n => n + 1 : (n: number) => number
+>n : number
+>n + 1 : number
+>n : number
+>1 : 1
+>1 : 1
+>fn : (value: number) => number
+}
+function stalePredicate(value: string | number) {
+>stalePredicate : (value: string | number) => void
+>value : string | number
+
+    if (value |> (value = 1, isString)) {
+>value |> (value = 1, isString) : boolean
+>value : string | number
+>(value = 1, isString) : (value: unknown) => value is string
+>value = 1, isString : (value: unknown) => value is string
+>value = 1 : 1
+>value : string | number
+>1 : 1
+>isString : (value: unknown) => value is string
+
+        const text: string = value; // Predicate describes the captured value.
+>text : string
+>value : number
+    }
+}
+
+declare function prefixedGuard(value: unknown, ...rest: unknown[]): value is string;
+>prefixedGuard : (value: unknown, ...rest: unknown[]) => value is string
+>value : unknown
+>rest : unknown[]
+
+declare function prefixedAssert(value: unknown, ...rest: unknown[]): asserts value;
+>prefixedAssert : (value: unknown, ...rest: unknown[]) => asserts value
+>value : unknown
+>rest : unknown[]
+
+declare function shiftedGuard(tag: unknown, value: unknown): value is string;
+>shiftedGuard : (tag: unknown, value: unknown) => value is string
+>tag : unknown
+>value : unknown
+
+declare function shiftedAssert(tag: unknown, value: unknown): asserts value;
+>shiftedAssert : (tag: unknown, value: unknown) => asserts value
+>tag : unknown
+>value : unknown
+
+function stableArrayPrefix(value: string | undefined, rest: unknown[]) {
+>stableArrayPrefix : (value: string | undefined, rest: unknown[]) => void
+>value : string | undefined
+>rest : unknown[]
+
+    if (...[value, ...rest] |> prefixedGuard) {
+>...[value, ...rest] |> prefixedGuard : boolean
+>...[value, ...rest] : unknown
+>[value, ...rest] : unknown[]
+>value : string | undefined
+>...rest : unknown
+>rest : unknown[]
+>prefixedGuard : (value: unknown, ...rest: unknown[]) => value is string
+
+        const text: string = value;
+>text : string
+>value : string
+    }
+    ...[value, ...rest] |> prefixedAssert;
+>...[value, ...rest] |> prefixedAssert : void
+>...[value, ...rest] : unknown
+>[value, ...rest] : unknown[]
+>value : string | undefined
+>...rest : unknown
+>rest : unknown[]
+>prefixedAssert : (value: unknown, ...rest: unknown[]) => asserts value
+
+    const text: string = value;
+>text : string
+>value : string
+}
+function shiftedArraySuffix(value: string | undefined, rest: number[]) {
+>shiftedArraySuffix : (value: string | undefined, rest: number[]) => void
+>value : string | undefined
+>rest : number[]
+
+    if (...[...rest, value] |> shiftedGuard) {
+>...[...rest, value] |> shiftedGuard : boolean
+>...[...rest, value] : string | number | undefined
+>[...rest, value] : (string | number | undefined)[]
+>...rest : number
+>rest : number[]
+>value : string | undefined
+>shiftedGuard : (tag: unknown, value: unknown) => value is string
+
+        const text: string = value; // A variable-length spread can shift value.
+>text : string
+>value : string | undefined
+    }
+    ...[...rest, value] |> shiftedAssert;
+>...[...rest, value] |> shiftedAssert : void
+>...[...rest, value] : string | number | undefined
+>[...rest, value] : (string | number | undefined)[]
+>...rest : number
+>rest : number[]
+>value : string | undefined
+>shiftedAssert : (tag: unknown, value: unknown) => asserts value
+
+    const text: string = value; // The asserted parameter need not be value.
+>text : string
+>value : string | undefined
+}
+

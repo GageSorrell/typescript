@@ -1,0 +1,17 @@
+// === findAllReferences ===
+// === /pipeEditorNavigation.ts ===
+// declare function [|select|](value: number): number;
+// declare function [|select|](value: string): string;
+// const obj = { method(value: number) { return value; } };
+// "x" |> /*FIND ALL REFS*/[|select|];
+// 1 |> (obj.method);
+
+
+
+// === findAllReferences ===
+// === /pipeEditorNavigation.ts ===
+// declare function select(value: number): number;
+// declare function select(value: string): string;
+// const obj = { [|method|](value: number) { return value; } };
+// "x" |> select;
+// 1 |> (obj./*FIND ALL REFS*/[|method|]);

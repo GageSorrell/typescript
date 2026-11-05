@@ -1,0 +1,91 @@
+//// [tests/cases/compiler/pipeOperatorDeclarations.ts] ////
+
+=== pipeOperatorDeclarations.ts ===
+/**
+ *
+ *
+ * @module typescript-go/testdata/tests/cases/compiler/pipeOperatorDeclarations
+ *
+ * @file      pipeOperatorDeclarations.ts
+ * @author    Gage Sorrell <gage@sorrell.sh>
+ * @copyright (c) 2026 Gage Sorrell
+ * @license   MIT
+ */
+
+
+declare function count(value: string): number;
+>count : Symbol(count, Decl(pipeOperatorDeclarations.ts, 0, 0))
+>value : Symbol(value, Decl(pipeOperatorDeclarations.ts, 12, 23))
+
+declare function identity<T>(value: T): T;
+>identity : Symbol(identity, Decl(pipeOperatorDeclarations.ts, 12, 46))
+>T : Symbol(T, Decl(pipeOperatorDeclarations.ts, 13, 26))
+>value : Symbol(value, Decl(pipeOperatorDeclarations.ts, 13, 29))
+>T : Symbol(T, Decl(pipeOperatorDeclarations.ts, 13, 26))
+>T : Symbol(T, Decl(pipeOperatorDeclarations.ts, 13, 26))
+
+declare function pair(a: number, b: string): { count: number; text: string };
+>pair : Symbol(pair, Decl(pipeOperatorDeclarations.ts, 13, 42))
+>a : Symbol(a, Decl(pipeOperatorDeclarations.ts, 14, 22))
+>b : Symbol(b, Decl(pipeOperatorDeclarations.ts, 14, 32))
+>count : Symbol(count, Decl(pipeOperatorDeclarations.ts, 14, 46))
+>text : Symbol(text, Decl(pipeOperatorDeclarations.ts, 14, 61))
+
+export const size = "abc" |> count;
+>size : Symbol(size, Decl(pipeOperatorDeclarations.ts, 16, 12))
+>count : Symbol(count, Decl(pipeOperatorDeclarations.ts, 0, 0))
+
+export const result = ...[1, "x"] |> pair;
+>result : Symbol(result, Decl(pipeOperatorDeclarations.ts, 17, 12))
+>pair : Symbol(pair, Decl(pipeOperatorDeclarations.ts, 13, 42))
+
+export const callbackResult = "abc" |> (value => value.length);
+>callbackResult : Symbol(callbackResult, Decl(pipeOperatorDeclarations.ts, 18, 12))
+>value : Symbol(value, Decl(pipeOperatorDeclarations.ts, 18, 40))
+>value.length : Symbol(String.length, Decl(lib.es5.d.ts, --, --))
+>value : Symbol(value, Decl(pipeOperatorDeclarations.ts, 18, 40))
+>length : Symbol(String.length, Decl(lib.es5.d.ts, --, --))
+
+export function generic<T>(value: T) { return value |> identity; }
+>generic : Symbol(generic, Decl(pipeOperatorDeclarations.ts, 18, 63))
+>T : Symbol(T, Decl(pipeOperatorDeclarations.ts, 19, 24))
+>value : Symbol(value, Decl(pipeOperatorDeclarations.ts, 19, 27))
+>T : Symbol(T, Decl(pipeOperatorDeclarations.ts, 19, 24))
+>value : Symbol(value, Decl(pipeOperatorDeclarations.ts, 19, 27))
+>identity : Symbol(identity, Decl(pipeOperatorDeclarations.ts, 12, 46))
+
+declare function merge<T>(a: T, b: T): T;
+>merge : Symbol(merge, Decl(pipeOperatorDeclarations.ts, 19, 66))
+>T : Symbol(T, Decl(pipeOperatorDeclarations.ts, 21, 23))
+>a : Symbol(a, Decl(pipeOperatorDeclarations.ts, 21, 26))
+>T : Symbol(T, Decl(pipeOperatorDeclarations.ts, 21, 23))
+>b : Symbol(b, Decl(pipeOperatorDeclarations.ts, 21, 31))
+>T : Symbol(T, Decl(pipeOperatorDeclarations.ts, 21, 23))
+>T : Symbol(T, Decl(pipeOperatorDeclarations.ts, 21, 23))
+
+declare function genericPair<T>(a: T, b: T): [T, T];
+>genericPair : Symbol(genericPair, Decl(pipeOperatorDeclarations.ts, 21, 41))
+>T : Symbol(T, Decl(pipeOperatorDeclarations.ts, 22, 29))
+>a : Symbol(a, Decl(pipeOperatorDeclarations.ts, 22, 32))
+>T : Symbol(T, Decl(pipeOperatorDeclarations.ts, 22, 29))
+>b : Symbol(b, Decl(pipeOperatorDeclarations.ts, 22, 37))
+>T : Symbol(T, Decl(pipeOperatorDeclarations.ts, 22, 29))
+>T : Symbol(T, Decl(pipeOperatorDeclarations.ts, 22, 29))
+>T : Symbol(T, Decl(pipeOperatorDeclarations.ts, 22, 29))
+
+const values = [1, 2];
+>values : Symbol(values, Decl(pipeOperatorDeclarations.ts, 23, 5))
+
+export const arrayResult = ...[...values] |> merge;
+>arrayResult : Symbol(arrayResult, Decl(pipeOperatorDeclarations.ts, 24, 12))
+>values : Symbol(values, Decl(pipeOperatorDeclarations.ts, 23, 5))
+>merge : Symbol(merge, Decl(pipeOperatorDeclarations.ts, 19, 66))
+
+export function fromArray<T>(values: T[]) { return ...[...values] |> genericPair; }
+>fromArray : Symbol(fromArray, Decl(pipeOperatorDeclarations.ts, 24, 51))
+>T : Symbol(T, Decl(pipeOperatorDeclarations.ts, 25, 26))
+>values : Symbol(values, Decl(pipeOperatorDeclarations.ts, 25, 29))
+>T : Symbol(T, Decl(pipeOperatorDeclarations.ts, 25, 26))
+>values : Symbol(values, Decl(pipeOperatorDeclarations.ts, 25, 29))
+>genericPair : Symbol(genericPair, Decl(pipeOperatorDeclarations.ts, 21, 41))
+

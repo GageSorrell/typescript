@@ -296,8 +296,12 @@ func (c *Checker) getTypeAtFlowCall(f *FlowState, flow *ast.FlowNode) FlowType {
 			switch {
 			case predicate.t != nil:
 				narrowedType = c.narrowTypeByTypePredicate(f, t, predicate, flow.Node, true /*assumeTrue*/)
-			case predicate.kind == TypePredicateKindAssertsIdentifier && predicate.parameterIndex >= 0 && int(predicate.parameterIndex) < len(flow.Node.Arguments()):
-				narrowedType = c.narrowTypeByAssertion(f, t, flow.Node.Arguments()[predicate.parameterIndex])
+			case predicate.kind == TypePredicateKindAssertsIdentifier:
+				if argument := c.getTypePredicateArgument(predicate, flow.Node); argument != nil {
+					narrowedType = c.narrowTypeByAssertion(f, t, argument)
+				} else {
+					narrowedType = t
+				}
 			default:
 				narrowedType = t
 			}
@@ -468,6 +472,8 @@ func (c *Checker) narrowTypeByCallExpression(f *FlowState, t *Type, callExpressi
 
 func (c *Checker) narrowTypeByBinaryExpression(f *FlowState, t *Type, expr *ast.BinaryExpression, assumeTrue bool) *Type {
 	switch expr.OperatorToken.Kind {
+	case ast.KindBarGreaterThanToken:
+		return c.narrowTypeByCallExpression(f, t, expr.AsNode(), assumeTrue)
 	case ast.KindEqualsToken, ast.KindBarBarEqualsToken, ast.KindAmpersandAmpersandEqualsToken, ast.KindQuestionQuestionEqualsToken:
 		return c.narrowTypeByTruthiness(f, c.narrowType(f, t, expr.Right, assumeTrue), expr.Left, assumeTrue)
 	case ast.KindEqualsEqualsToken, ast.KindExclamationEqualsToken, ast.KindEqualsEqualsEqualsToken, ast.KindExclamationEqualsEqualsToken:
@@ -1384,7 +1390,7 @@ func (c *Checker) getTypeAtFlowArrayMutation(f *FlowState, flow *ast.FlowNode) F
 	if f.declaredType == c.autoType || f.declaredType == c.autoArrayType {
 		node := flow.Node
 		var expr *ast.Node
-		if ast.IsCallExpression(node) {
+		if ast.IsCallExpression(node) || ast.IsPipeExpression(node) {
 			expr = node.Expression().Expression()
 		} else {
 			expr = node.AsBinaryExpression().Left.Expression()
@@ -1393,7 +1399,7 @@ func (c *Checker) getTypeAtFlowArrayMutation(f *FlowState, flow *ast.FlowNode) F
 			flowType := c.getTypeAtFlowNode(f, flow.Antecedent)
 			if flowType.t.objectFlags&ObjectFlagsEvolvingArray != 0 {
 				evolvedType := flowType.t
-				if ast.IsCallExpression(node) {
+				if ast.IsCallExpression(node) || ast.IsPipeExpression(node) {
 					for _, arg := range node.Arguments() {
 						evolvedType = c.addEvolvingArrayElementType(evolvedType, arg)
 					}
@@ -1522,7 +1528,7 @@ func (c *Checker) isEvolvingArrayOperationTarget(node *ast.Node) bool {
 	root := c.getReferenceRoot(node)
 	parent := root.Parent
 	isLengthPushOrUnshift := ast.IsPropertyAccessExpression(parent) && (parent.Name().Text() == "length" ||
-		ast.IsCallExpression(parent.Parent) && ast.IsIdentifier(parent.Name()) && ast.IsPushOrUnshiftIdentifier(parent.Name()))
+		(ast.IsCallExpression(parent.Parent) || ast.IsPipeExpression(parent.Parent) && parent.Parent.Expression() == parent) && ast.IsIdentifier(parent.Name()) && ast.IsPushOrUnshiftIdentifier(parent.Name()))
 	isElementAssignment := ast.IsElementAccessExpression(parent) && parent.Expression() == root &&
 		ast.IsBinaryExpression(parent.Parent) && parent.Parent.AsBinaryExpression().OperatorToken.Kind == ast.KindEqualsToken &&
 		parent.Parent.AsBinaryExpression().Left == parent && !ast.IsAssignmentTarget(parent.Parent) &&
@@ -2032,7 +2038,7 @@ func (c *Checker) getEffectsSignature(node *ast.Node) *Signature {
 		// circularities in control flow analysis, we use getTypeOfDottedName when resolving the call
 		// target expression of an assertion.
 		var funcType *Type
-		if ast.IsBinaryExpression(node) {
+		if ast.IsInstanceOfExpression(node) {
 			rightType := c.checkNonNullExpression(node.AsBinaryExpression().Right)
 			funcType = c.getSymbolHasInstanceMethodOfObjectType(rightType)
 		} else if ast.IsExpressionStatement(node.Parent) {
@@ -2421,8 +2427,22 @@ func (c *Checker) typeMaybeAssignableTo(source *Type, target *Type) bool {
 func (c *Checker) getTypePredicateArgument(predicate *TypePredicate, callExpression *ast.Node) *ast.Node {
 	if predicate.kind == TypePredicateKindIdentifier || predicate.kind == TypePredicateKindAssertsIdentifier {
 		arguments := callExpression.Arguments()
+		if ast.IsPipeExpression(callExpression) {
+			effectiveArgs := c.getEffectiveCallArguments(callExpression)
+			if hasPipeUnknownSpread(callExpression, effectiveArgs) {
+				argument := c.pipeSpreadSourceArgumentAtPosition(effectiveArgs, int(predicate.parameterIndex))
+				if argument == nil || c.pipeTargetWritesArgument(callExpression, argument) {
+					return nil
+				}
+				return argument
+			}
+		}
 		if predicate.parameterIndex >= 0 && int(predicate.parameterIndex) < len(arguments) {
-			return arguments[predicate.parameterIndex]
+			argument := arguments[predicate.parameterIndex]
+			if ast.IsPipeExpression(callExpression) && c.pipeTargetWritesArgument(callExpression, argument) {
+				return nil
+			}
+			return argument
 		}
 	} else {
 		invokedExpression := ast.SkipParentheses(callExpression.Expression())
@@ -2512,7 +2532,7 @@ func (c *Checker) isReachableFlowNodeWorker(f *FlowState, flow *ast.FlowNode, no
 		case flags&ast.FlowFlagsCall != 0:
 			if signature := c.getEffectsSignature(flow.Node); signature != nil {
 				if predicate := c.getTypePredicateOfSignature(signature); predicate != nil && predicate.kind == TypePredicateKindAssertsIdentifier && predicate.t == nil {
-					if arguments := flow.Node.Arguments(); predicate.parameterIndex >= 0 && int(predicate.parameterIndex) < len(arguments) && c.isFalseExpression(arguments[predicate.parameterIndex]) {
+					if argument := c.getTypePredicateArgument(predicate, flow.Node); argument != nil && c.isFalseExpression(argument) {
 						return false
 					}
 				}

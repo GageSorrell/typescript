@@ -561,7 +561,7 @@ func getQuickInfoAndDeclarationAtLocation(c *checker.Checker, symbol *ast.Symbol
 			}
 			if callNode := getCallOrNewExpression(node); callNode != nil {
 				flags := typeFormatFlags | checker.TypeFormatFlagsWriteTypeArgumentsOfSignature | checker.TypeFormatFlagsWriteArrowStyleSignature
-				if ast.IsCallExpression(callNode) {
+				if ast.IsCallExpression(callNode) || ast.IsPipeExpression(callNode) {
 					flags |= checker.TypeFormatFlagsWriteCallStyleSignature
 				}
 				writeSignatureClassified(c.GetResolvedSignature(callNode), container, flags)
@@ -830,7 +830,7 @@ func getCallOrNewExpression(node *ast.Node) *ast.Node {
 	if (ast.IsCallExpression(node.Parent) || ast.IsNewExpression(node.Parent)) && node.Parent.Expression() == node {
 		return node.Parent
 	}
-	return nil
+	return getPipeInvocationOfTarget(node)
 }
 
 func containsTypedefTag(jsdoc *ast.Node) bool {

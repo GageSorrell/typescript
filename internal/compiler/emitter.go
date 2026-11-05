@@ -152,6 +152,9 @@ func getScriptTransformers(emitContext *printer.EmitContext, host printer.EmitHo
 		tx = append(tx, jsxtransforms.NewJSXTransformer(&opts))
 	}
 
+	// Pipes are fork syntax and must be lowered even for ESNext and JS input.
+	tx = append(tx, estransforms.NewPipeTransformer(&opts))
+
 	downleveler := estransforms.GetESTransformer(&opts)
 	if downleveler != nil {
 		tx = append(tx, downleveler)

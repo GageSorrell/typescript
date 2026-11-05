@@ -60,6 +60,7 @@
             "GreaterThanGreaterThanGreaterThanToken",
             "AmpersandToken",
             "BarToken",
+            "BarGreaterThanToken",
             "CaretToken",
             "ExclamationToken",
             "TildeToken",
@@ -787,6 +788,7 @@
             ],
             "AssignmentOperatorOrHigher": [
                 "QuestionQuestionToken",
+                "BarGreaterThanToken",
                 "LogicalOperatorOrHigher",
                 "AssignmentOperator"
             ],

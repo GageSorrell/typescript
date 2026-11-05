@@ -62,7 +62,8 @@ const (
 )
 
 const (
-	ProtocolVersion uint8 = 5
+	// The pipe token changes SyntaxKind numbers; reject pre-fork AST payloads.
+	ProtocolVersion uint8 = 6
 )
 
 // Source File Binary Format

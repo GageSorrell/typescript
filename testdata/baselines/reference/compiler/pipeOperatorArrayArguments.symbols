@@ -1,0 +1,232 @@
+//// [tests/cases/compiler/pipeOperatorArrayArguments.ts] ////
+
+=== pipeOperatorArrayArguments.ts ===
+/**
+ *
+ *
+ * @module typescript-go/testdata/tests/cases/compiler/pipeOperatorArrayArguments
+ *
+ * @file      pipeOperatorArrayArguments.ts
+ * @author    Gage Sorrell <gage@sorrell.sh>
+ * @copyright (c) 2026 Gage Sorrell
+ * @license   MIT
+ */
+
+
+declare function add(a: number, b: number): number;
+>add : Symbol(add, Decl(pipeOperatorArrayArguments.ts, 0, 0))
+>a : Symbol(a, Decl(pipeOperatorArrayArguments.ts, 12, 21))
+>b : Symbol(b, Decl(pipeOperatorArrayArguments.ts, 12, 31))
+
+declare function prefix(head: string, a: number, b: number): number;
+>prefix : Symbol(prefix, Decl(pipeOperatorArrayArguments.ts, 12, 51))
+>head : Symbol(head, Decl(pipeOperatorArrayArguments.ts, 13, 24))
+>a : Symbol(a, Decl(pipeOperatorArrayArguments.ts, 13, 37))
+>b : Symbol(b, Decl(pipeOperatorArrayArguments.ts, 13, 48))
+
+declare function optional(a?: number, b?: number): number;
+>optional : Symbol(optional, Decl(pipeOperatorArrayArguments.ts, 13, 68))
+>a : Symbol(a, Decl(pipeOperatorArrayArguments.ts, 14, 26))
+>b : Symbol(b, Decl(pipeOperatorArrayArguments.ts, 14, 37))
+
+declare function rest(a: number, ...args: number[]): number;
+>rest : Symbol(rest, Decl(pipeOperatorArrayArguments.ts, 14, 58))
+>a : Symbol(a, Decl(pipeOperatorArrayArguments.ts, 15, 22))
+>args : Symbol(args, Decl(pipeOperatorArrayArguments.ts, 15, 32))
+
+declare function select(a: number, b: number): number;
+>select : Symbol(select, Decl(pipeOperatorArrayArguments.ts, 15, 60), Decl(pipeOperatorArrayArguments.ts, 16, 54))
+>a : Symbol(a, Decl(pipeOperatorArrayArguments.ts, 16, 24))
+>b : Symbol(b, Decl(pipeOperatorArrayArguments.ts, 16, 34))
+
+declare function select(a: string, b: string): string;
+>select : Symbol(select, Decl(pipeOperatorArrayArguments.ts, 15, 60), Decl(pipeOperatorArrayArguments.ts, 16, 54))
+>a : Symbol(a, Decl(pipeOperatorArrayArguments.ts, 17, 24))
+>b : Symbol(b, Decl(pipeOperatorArrayArguments.ts, 17, 34))
+
+declare function merge<T>(a: T, b: T): T;
+>merge : Symbol(merge, Decl(pipeOperatorArrayArguments.ts, 17, 54))
+>T : Symbol(T, Decl(pipeOperatorArrayArguments.ts, 18, 23))
+>a : Symbol(a, Decl(pipeOperatorArrayArguments.ts, 18, 26))
+>T : Symbol(T, Decl(pipeOperatorArrayArguments.ts, 18, 23))
+>b : Symbol(b, Decl(pipeOperatorArrayArguments.ts, 18, 31))
+>T : Symbol(T, Decl(pipeOperatorArrayArguments.ts, 18, 23))
+>T : Symbol(T, Decl(pipeOperatorArrayArguments.ts, 18, 23))
+
+declare function pair<A, B>(a: A, b: B): [A, B];
+>pair : Symbol(pair, Decl(pipeOperatorArrayArguments.ts, 18, 41))
+>A : Symbol(A, Decl(pipeOperatorArrayArguments.ts, 19, 22))
+>B : Symbol(B, Decl(pipeOperatorArrayArguments.ts, 19, 24))
+>a : Symbol(a, Decl(pipeOperatorArrayArguments.ts, 19, 28))
+>A : Symbol(A, Decl(pipeOperatorArrayArguments.ts, 19, 22))
+>b : Symbol(b, Decl(pipeOperatorArrayArguments.ts, 19, 33))
+>B : Symbol(B, Decl(pipeOperatorArrayArguments.ts, 19, 24))
+>A : Symbol(A, Decl(pipeOperatorArrayArguments.ts, 19, 22))
+>B : Symbol(B, Decl(pipeOperatorArrayArguments.ts, 19, 24))
+
+declare function capture<T extends unknown[]>(...args: T): T;
+>capture : Symbol(capture, Decl(pipeOperatorArrayArguments.ts, 19, 48))
+>T : Symbol(T, Decl(pipeOperatorArrayArguments.ts, 20, 25))
+>args : Symbol(args, Decl(pipeOperatorArrayArguments.ts, 20, 46))
+>T : Symbol(T, Decl(pipeOperatorArrayArguments.ts, 20, 25))
+>T : Symbol(T, Decl(pipeOperatorArrayArguments.ts, 20, 25))
+
+declare function tupleRest(...args: [number, number]): number;
+>tupleRest : Symbol(tupleRest, Decl(pipeOperatorArrayArguments.ts, 20, 61))
+>args : Symbol(args, Decl(pipeOperatorArrayArguments.ts, 21, 27))
+
+declare function variadic<T>(...args: [...T[], boolean]): T;
+>variadic : Symbol(variadic, Decl(pipeOperatorArrayArguments.ts, 21, 62))
+>T : Symbol(T, Decl(pipeOperatorArrayArguments.ts, 22, 26))
+>args : Symbol(args, Decl(pipeOperatorArrayArguments.ts, 22, 29))
+>T : Symbol(T, Decl(pipeOperatorArrayArguments.ts, 22, 26))
+>T : Symbol(T, Decl(pipeOperatorArrayArguments.ts, 22, 26))
+
+declare function callback(cb: (n: number) => number, ...args: number[]): number;
+>callback : Symbol(callback, Decl(pipeOperatorArrayArguments.ts, 22, 60))
+>cb : Symbol(cb, Decl(pipeOperatorArrayArguments.ts, 23, 26))
+>n : Symbol(n, Decl(pipeOperatorArrayArguments.ts, 23, 31))
+>args : Symbol(args, Decl(pipeOperatorArrayArguments.ts, 23, 52))
+
+const Foo = [1, 2];
+>Foo : Symbol(Foo, Decl(pipeOperatorArrayArguments.ts, 25, 5))
+
+declare const readonlyValues: readonly number[];
+>readonlyValues : Symbol(readonlyValues, Decl(pipeOperatorArrayArguments.ts, 26, 13))
+
+declare const strings: string[];
+>strings : Symbol(strings, Decl(pipeOperatorArrayArguments.ts, 27, 13))
+
+const empty: number[] = [];
+>empty : Symbol(empty, Decl(pipeOperatorArrayArguments.ts, 28, 5))
+
+const ordinary = ...[...Foo] |> add;
+>ordinary : Symbol(ordinary, Decl(pipeOperatorArrayArguments.ts, 29, 5))
+>Foo : Symbol(Foo, Decl(pipeOperatorArrayArguments.ts, 25, 5))
+>add : Symbol(add, Decl(pipeOperatorArrayArguments.ts, 0, 0))
+
+const readonlyInput = ...[...readonlyValues] |> add;
+>readonlyInput : Symbol(readonlyInput, Decl(pipeOperatorArrayArguments.ts, 30, 5))
+>readonlyValues : Symbol(readonlyValues, Decl(pipeOperatorArrayArguments.ts, 26, 13))
+>add : Symbol(add, Decl(pipeOperatorArrayArguments.ts, 0, 0))
+
+const possiblyMissing = ...[...empty] |> add;
+>possiblyMissing : Symbol(possiblyMissing, Decl(pipeOperatorArrayArguments.ts, 31, 5))
+>empty : Symbol(empty, Decl(pipeOperatorArrayArguments.ts, 28, 5))
+>add : Symbol(add, Decl(pipeOperatorArrayArguments.ts, 0, 0))
+
+const possiblyExcess = ...[...[1, 2, 3, 4]] |> add;
+>possiblyExcess : Symbol(possiblyExcess, Decl(pipeOperatorArrayArguments.ts, 32, 5))
+>add : Symbol(add, Decl(pipeOperatorArrayArguments.ts, 0, 0))
+
+const mixedPrefix = ...["head", ...Foo] |> prefix;
+>mixedPrefix : Symbol(mixedPrefix, Decl(pipeOperatorArrayArguments.ts, 33, 5))
+>Foo : Symbol(Foo, Decl(pipeOperatorArrayArguments.ts, 25, 5))
+>prefix : Symbol(prefix, Decl(pipeOperatorArrayArguments.ts, 12, 51))
+
+const mixedSuffix = ...[...Foo, 1] |> add;
+>mixedSuffix : Symbol(mixedSuffix, Decl(pipeOperatorArrayArguments.ts, 34, 5))
+>Foo : Symbol(Foo, Decl(pipeOperatorArrayArguments.ts, 25, 5))
+>add : Symbol(add, Decl(pipeOperatorArrayArguments.ts, 0, 0))
+
+const multiple = ...[...Foo, ...readonlyValues] |> add;
+>multiple : Symbol(multiple, Decl(pipeOperatorArrayArguments.ts, 35, 5))
+>Foo : Symbol(Foo, Decl(pipeOperatorArrayArguments.ts, 25, 5))
+>readonlyValues : Symbol(readonlyValues, Decl(pipeOperatorArrayArguments.ts, 26, 13))
+>add : Symbol(add, Decl(pipeOperatorArrayArguments.ts, 0, 0))
+
+const optionalResult = ...[...Foo] |> optional;
+>optionalResult : Symbol(optionalResult, Decl(pipeOperatorArrayArguments.ts, 36, 5))
+>Foo : Symbol(Foo, Decl(pipeOperatorArrayArguments.ts, 25, 5))
+>optional : Symbol(optional, Decl(pipeOperatorArrayArguments.ts, 13, 68))
+
+const restResult = ...[...Foo] |> rest;
+>restResult : Symbol(restResult, Decl(pipeOperatorArrayArguments.ts, 37, 5))
+>Foo : Symbol(Foo, Decl(pipeOperatorArrayArguments.ts, 25, 5))
+>rest : Symbol(rest, Decl(pipeOperatorArrayArguments.ts, 14, 58))
+
+const selected = ...[...strings] |> select;
+>selected : Symbol(selected, Decl(pipeOperatorArrayArguments.ts, 38, 5))
+>strings : Symbol(strings, Decl(pipeOperatorArrayArguments.ts, 27, 13))
+>select : Symbol(select, Decl(pipeOperatorArrayArguments.ts, 15, 60), Decl(pipeOperatorArrayArguments.ts, 16, 54))
+
+const generic = ...[...Foo] |> merge;
+>generic : Symbol(generic, Decl(pipeOperatorArrayArguments.ts, 39, 5))
+>Foo : Symbol(Foo, Decl(pipeOperatorArrayArguments.ts, 25, 5))
+>merge : Symbol(merge, Decl(pipeOperatorArrayArguments.ts, 17, 54))
+
+const separate = ...[...Foo] |> pair;
+>separate : Symbol(separate, Decl(pipeOperatorArrayArguments.ts, 40, 5))
+>Foo : Symbol(Foo, Decl(pipeOperatorArrayArguments.ts, 25, 5))
+>pair : Symbol(pair, Decl(pipeOperatorArrayArguments.ts, 18, 41))
+
+const captured = ...[...Foo] |> capture;
+>captured : Symbol(captured, Decl(pipeOperatorArrayArguments.ts, 41, 5))
+>Foo : Symbol(Foo, Decl(pipeOperatorArrayArguments.ts, 25, 5))
+>capture : Symbol(capture, Decl(pipeOperatorArrayArguments.ts, 19, 48))
+
+const fixedRestTuple = ...[...Foo] |> tupleRest;
+>fixedRestTuple : Symbol(fixedRestTuple, Decl(pipeOperatorArrayArguments.ts, 42, 5))
+>Foo : Symbol(Foo, Decl(pipeOperatorArrayArguments.ts, 25, 5))
+>tupleRest : Symbol(tupleRest, Decl(pipeOperatorArrayArguments.ts, 20, 61))
+
+const variadicSuffix = ...[...Foo, true] |> variadic;
+>variadicSuffix : Symbol(variadicSuffix, Decl(pipeOperatorArrayArguments.ts, 43, 5))
+>Foo : Symbol(Foo, Decl(pipeOperatorArrayArguments.ts, 25, 5))
+>variadic : Symbol(variadic, Decl(pipeOperatorArrayArguments.ts, 21, 62))
+
+const contextual = ...[n => n.toFixed().length, ...Foo] |> callback;
+>contextual : Symbol(contextual, Decl(pipeOperatorArrayArguments.ts, 44, 5))
+>n : Symbol(n, Decl(pipeOperatorArrayArguments.ts, 44, 23))
+>n.toFixed().length : Symbol(String.length, Decl(lib.es5.d.ts, --, --))
+>n.toFixed : Symbol(Number.toFixed, Decl(lib.es5.d.ts, --, --))
+>n : Symbol(n, Decl(pipeOperatorArrayArguments.ts, 44, 23))
+>toFixed : Symbol(Number.toFixed, Decl(lib.es5.d.ts, --, --))
+>length : Symbol(String.length, Decl(lib.es5.d.ts, --, --))
+>Foo : Symbol(Foo, Decl(pipeOperatorArrayArguments.ts, 25, 5))
+>callback : Symbol(callback, Decl(pipeOperatorArrayArguments.ts, 22, 60))
+
+const inline = ...[...Foo] |> ((a, b) => a.toFixed() + b.toFixed());
+>inline : Symbol(inline, Decl(pipeOperatorArrayArguments.ts, 45, 5))
+>Foo : Symbol(Foo, Decl(pipeOperatorArrayArguments.ts, 25, 5))
+>a : Symbol(a, Decl(pipeOperatorArrayArguments.ts, 45, 32))
+>b : Symbol(b, Decl(pipeOperatorArrayArguments.ts, 45, 34))
+>a.toFixed : Symbol(Number.toFixed, Decl(lib.es5.d.ts, --, --))
+>a : Symbol(a, Decl(pipeOperatorArrayArguments.ts, 45, 32))
+>toFixed : Symbol(Number.toFixed, Decl(lib.es5.d.ts, --, --))
+>b.toFixed : Symbol(Number.toFixed, Decl(lib.es5.d.ts, --, --))
+>b : Symbol(b, Decl(pipeOperatorArrayArguments.ts, 45, 34))
+>toFixed : Symbol(Number.toFixed, Decl(lib.es5.d.ts, --, --))
+
+const inlineRest = ...[...Foo] |> ((head, ...tail) => head + tail[0]);
+>inlineRest : Symbol(inlineRest, Decl(pipeOperatorArrayArguments.ts, 46, 5))
+>Foo : Symbol(Foo, Decl(pipeOperatorArrayArguments.ts, 25, 5))
+>head : Symbol(head, Decl(pipeOperatorArrayArguments.ts, 46, 36))
+>tail : Symbol(tail, Decl(pipeOperatorArrayArguments.ts, 46, 41))
+>head : Symbol(head, Decl(pipeOperatorArrayArguments.ts, 46, 36))
+>tail : Symbol(tail, Decl(pipeOperatorArrayArguments.ts, 46, 41))
+
+declare const optionalTuple: [number?];
+>optionalTuple : Symbol(optionalTuple, Decl(pipeOperatorArrayArguments.ts, 47, 13))
+
+declare function acceptsOptional(a: number | undefined, b: number | undefined): void;
+>acceptsOptional : Symbol(acceptsOptional, Decl(pipeOperatorArrayArguments.ts, 47, 39))
+>a : Symbol(a, Decl(pipeOperatorArrayArguments.ts, 48, 33))
+>b : Symbol(b, Decl(pipeOperatorArrayArguments.ts, 48, 55))
+
+...[...optionalTuple, ...Foo] |> acceptsOptional;
+>optionalTuple : Symbol(optionalTuple, Decl(pipeOperatorArrayArguments.ts, 47, 13))
+>Foo : Symbol(Foo, Decl(pipeOperatorArrayArguments.ts, 25, 5))
+>acceptsOptional : Symbol(acceptsOptional, Decl(pipeOperatorArrayArguments.ts, 47, 39))
+
+function genericSource<T>(values: T[]) {
+>genericSource : Symbol(genericSource, Decl(pipeOperatorArrayArguments.ts, 49, 49))
+>T : Symbol(T, Decl(pipeOperatorArrayArguments.ts, 51, 23))
+>values : Symbol(values, Decl(pipeOperatorArrayArguments.ts, 51, 26))
+>T : Symbol(T, Decl(pipeOperatorArrayArguments.ts, 51, 23))
+
+    return ...[...values] |> pair;
+>values : Symbol(values, Decl(pipeOperatorArrayArguments.ts, 51, 26))
+>pair : Symbol(pair, Decl(pipeOperatorArrayArguments.ts, 18, 41))
+}
+

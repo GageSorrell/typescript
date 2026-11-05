@@ -1839,11 +1839,17 @@ func GetImmediatelyInvokedFunctionExpression(fn *Node) *Node {
 			prev = parent
 			parent = parent.Parent
 		}
-		if IsCallExpression(parent) && parent.Expression() == prev {
+		if (IsCallExpression(parent) || IsPipeExpression(parent)) && parent.Expression() == prev {
 			return parent
 		}
 	}
 	return nil
+}
+
+// IsPipeExpression reports whether node invokes its right operand with the
+// value (or explicitly unpacked values) on its left.
+func IsPipeExpression(node *Node) bool {
+	return IsBinaryExpression(node) && node.AsBinaryExpression().OperatorToken.Kind == KindBarGreaterThanToken
 }
 
 func IsEnumConst(node *Node) bool {
@@ -2933,7 +2939,7 @@ func IsCallLikeExpression(node *Node) bool {
 		KindTaggedTemplateExpression, KindDecorator:
 		return true
 	case KindBinaryExpression:
-		return node.AsBinaryExpression().OperatorToken.Kind == KindInstanceOfKeyword
+		return node.AsBinaryExpression().OperatorToken.Kind == KindInstanceOfKeyword || IsPipeExpression(node)
 	}
 	return false
 }

@@ -336,6 +336,9 @@ func getAncestorCallLikeExpression(node *ast.Node) *ast.Node {
 		return !ast.IsRightSideOfPropertyAccess(n)
 	})
 	callLike := target.Parent
+	if pipe := getPipeInvocationOfTarget(target); pipe != nil {
+		return pipe
+	}
 	if callLike != nil && ast.IsCallLikeExpression(callLike) && ast.GetInvokedExpression(callLike) == target {
 		return callLike
 	}

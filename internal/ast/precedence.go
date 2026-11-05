@@ -43,6 +43,10 @@ const (
 	//     ShortCircuitExpression
 	//     ShortCircuitExpression `?` AssignmentExpression `:` AssignmentExpression
 	OperatorPrecedenceConditional
+	// PipeExpression:
+	//     ShortCircuitExpression
+	//     PipeExpression `|>` ShortCircuitExpression
+	OperatorPrecedencePipe
 	// LogicalORExpression:
 	//     LogicalANDExpression
 	//     LogicalORExpression `||` LogicalANDExpression
@@ -335,6 +339,8 @@ func GetOperatorPrecedence(nodeKind Kind, operatorKind Kind, flags OperatorPrece
 // Gets the precedence of a binary operator
 func GetBinaryOperatorPrecedence(operatorKind Kind) OperatorPrecedence {
 	switch operatorKind {
+	case KindBarGreaterThanToken:
+		return OperatorPrecedencePipe
 	case KindQuestionQuestionToken:
 		return OperatorPrecedenceCoalesce
 	case KindBarBarToken:

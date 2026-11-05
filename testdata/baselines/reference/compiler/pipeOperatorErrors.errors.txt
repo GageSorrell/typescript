@@ -1,0 +1,78 @@
+pipeOperatorErrors.ts(22,1): error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+pipeOperatorErrors.ts(23,1): error TS2554: Expected 2 arguments, but got 1.
+pipeOperatorErrors.ts(24,1): error TS2554: Expected 1 arguments, but got 0.
+pipeOperatorErrors.ts(25,8): error TS2554: Expected 1 arguments, but got 2.
+pipeOperatorErrors.ts(26,1): error TS2345: Argument of type 'number[]' is not assignable to parameter of type 'number'.
+pipeOperatorErrors.ts(27,6): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+pipeOperatorErrors.ts(28,6): error TS2722: Cannot invoke an object which is possibly 'undefined'.
+pipeOperatorErrors.ts(29,1): error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+pipeOperatorErrors.ts(30,1): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Argument of type 'boolean' is not assignable to parameter of type 'string'.
+pipeOperatorErrors.ts(31,1): error TS2684: The 'this' context of type 'void' is not assignable to method's 'this' of type '{ value: string; }'.
+
+
+==== pipeOperatorErrors.ts (10 errors) ====
+    /**
+     *
+     *
+     * @module typescript-go/testdata/tests/cases/compiler/pipeOperatorErrors
+     *
+     * @file      pipeOperatorErrors.ts
+     * @author    Gage Sorrell <gage@sorrell.sh>
+     * @copyright (c) 2026 Gage Sorrell
+     * @license   MIT
+     */
+    
+    
+    declare function stringOnly(value: string): void;
+    declare function twoNumbers(a: number, b: number): void;
+    declare function oneNumber(a: number): void;
+    declare function constrained<T extends string>(value: T): T;
+    declare function overloaded(value: number): number;
+    declare function overloaded(value: string): string;
+    declare function needsThis(this: { value: string }, value: number): void;
+    declare const maybe: ((value: number) => number) | undefined;
+    
+    1 |> stringOnly;
+    ~
+!!! error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+    1 |> twoNumbers;
+    ~~~~~~~~~~~~~~~
+!!! error TS2554: Expected 2 arguments, but got 1.
+!!! related TS6210 pipeOperatorErrors.ts:14:40: An argument for 'b' was not provided.
+    ...[] |> oneNumber;
+    ~~~~~~~~~~~~~~~~~~
+!!! error TS2554: Expected 1 arguments, but got 0.
+!!! related TS6210 pipeOperatorErrors.ts:15:28: An argument for 'a' was not provided.
+    ...[1, 2] |> oneNumber;
+           ~
+!!! error TS2554: Expected 1 arguments, but got 2.
+    [1, 2] |> oneNumber;
+    ~~~~~~
+!!! error TS2345: Argument of type 'number[]' is not assignable to parameter of type 'number'.
+    1 |> 2;
+         ~
+!!! error TS2349: This expression is not callable.
+!!! error TS2349:   Type 'Number' has no call signatures.
+    1 |> maybe;
+         ~~~~~
+!!! error TS2722: Cannot invoke an object which is possibly 'undefined'.
+    1 |> constrained;
+    ~
+!!! error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+    true |> overloaded;
+    ~~~~
+!!! error TS2769: No overload matches this call.
+!!! error TS2769:   The last overload gave the following error.
+!!! error TS2769:     Argument of type 'boolean' is not assignable to parameter of type 'string'.
+!!! related TS2771 pipeOperatorErrors.ts:18:18: The last overload is declared here.
+    1 |> needsThis;
+    ~~~~~~~~~~~~~~
+!!! error TS2684: The 'this' context of type 'void' is not assignable to method's 'this' of type '{ value: string; }'.
+    
+    // Unknown-length arrays are accepted by pipe calls.
+    const values = [1, 2];
+    ...[...values] |> twoNumbers;
+    

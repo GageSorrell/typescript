@@ -309,6 +309,10 @@ func (n *Node) Text() string {
 
 func (n *Node) Expression() *Node {
 	switch n.Kind {
+	case KindBinaryExpression:
+		if IsPipeExpression(n) {
+			return n.AsBinaryExpression().Right
+		}
 	case KindPropertyAccessExpression:
 		return n.AsPropertyAccessExpression().Expression
 	case KindElementAccessExpression:
@@ -475,6 +479,14 @@ func (m *MutableNode) SetExpression(expr *Node) {
 
 func (n *Node) ArgumentList() *NodeList {
 	switch n.Kind {
+	case KindBinaryExpression:
+		if IsPipeExpression(n) {
+			left := n.AsBinaryExpression().Left
+			if IsSpreadElement(left) && IsArrayLiteralExpression(left.Expression()) {
+				return left.Expression().AsArrayLiteralExpression().Elements
+			}
+			return &NodeList{Loc: left.Loc, Nodes: []*Node{left}}
+		}
 	case KindCallExpression:
 		return n.AsCallExpression().Arguments
 	case KindNewExpression:
@@ -493,6 +505,10 @@ func (n *Node) Arguments() []*Node {
 
 func (n *Node) TypeArgumentList() *NodeList {
 	switch n.Kind {
+	case KindBinaryExpression:
+		if IsPipeExpression(n) {
+			return nil
+		}
 	case KindCallExpression:
 		return n.AsCallExpression().TypeArguments
 	case KindNewExpression:
@@ -1108,6 +1124,10 @@ func (n *Node) QuestionToken() *TokenNode {
 
 func (n *Node) QuestionDotToken() *Node {
 	switch n.Kind {
+	case KindBinaryExpression:
+		if IsPipeExpression(n) {
+			return nil
+		}
 	case KindElementAccessExpression:
 		return n.AsElementAccessExpression().QuestionDotToken
 	case KindPropertyAccessExpression:

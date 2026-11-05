@@ -1,0 +1,320 @@
+//// [tests/cases/compiler/pipeOperatorArrayArguments.ts] ////
+
+=== pipeOperatorArrayArguments.ts ===
+/**
+ *
+ *
+ * @module typescript-go/testdata/tests/cases/compiler/pipeOperatorArrayArguments
+ *
+ * @file      pipeOperatorArrayArguments.ts
+ * @author    Gage Sorrell <gage@sorrell.sh>
+ * @copyright (c) 2026 Gage Sorrell
+ * @license   MIT
+ */
+
+
+declare function add(a: number, b: number): number;
+>add : (a: number, b: number) => number
+>a : number
+>b : number
+
+declare function prefix(head: string, a: number, b: number): number;
+>prefix : (head: string, a: number, b: number) => number
+>head : string
+>a : number
+>b : number
+
+declare function optional(a?: number, b?: number): number;
+>optional : (a?: number, b?: number) => number
+>a : number | undefined
+>b : number | undefined
+
+declare function rest(a: number, ...args: number[]): number;
+>rest : (a: number, ...args: number[]) => number
+>a : number
+>args : number[]
+
+declare function select(a: number, b: number): number;
+>select : { (a: number, b: number): number; (a: string, b: string): string; }
+>a : number
+>b : number
+
+declare function select(a: string, b: string): string;
+>select : { (a: number, b: number): number; (a: string, b: string): string; }
+>a : string
+>b : string
+
+declare function merge<T>(a: T, b: T): T;
+>merge : <T>(a: T, b: T) => T
+>a : T
+>b : T
+
+declare function pair<A, B>(a: A, b: B): [A, B];
+>pair : <A, B>(a: A, b: B) => [A, B]
+>a : A
+>b : B
+
+declare function capture<T extends unknown[]>(...args: T): T;
+>capture : <T extends unknown[]>(...args: T) => T
+>args : T
+
+declare function tupleRest(...args: [number, number]): number;
+>tupleRest : (args_0: number, args_1: number) => number
+>args : [number, number]
+
+declare function variadic<T>(...args: [...T[], boolean]): T;
+>variadic : <T>(...args: [...T[], boolean]) => T
+>args : [...T[], boolean]
+
+declare function callback(cb: (n: number) => number, ...args: number[]): number;
+>callback : (cb: (n: number) => number, ...args: number[]) => number
+>cb : (n: number) => number
+>n : number
+>args : number[]
+
+const Foo = [1, 2];
+>Foo : number[]
+>[1, 2] : number[]
+>1 : 1
+>2 : 2
+
+declare const readonlyValues: readonly number[];
+>readonlyValues : readonly number[]
+
+declare const strings: string[];
+>strings : string[]
+
+const empty: number[] = [];
+>empty : number[]
+>[] : never[]
+
+const ordinary = ...[...Foo] |> add;
+>ordinary : number
+>...[...Foo] |> add : number
+>...[...Foo] : number
+>[...Foo] : number[]
+>...Foo : number
+>Foo : number[]
+>add : (a: number, b: number) => number
+
+const readonlyInput = ...[...readonlyValues] |> add;
+>readonlyInput : number
+>...[...readonlyValues] |> add : number
+>...[...readonlyValues] : number
+>[...readonlyValues] : number[]
+>...readonlyValues : number
+>readonlyValues : readonly number[]
+>add : (a: number, b: number) => number
+
+const possiblyMissing = ...[...empty] |> add;
+>possiblyMissing : number
+>...[...empty] |> add : number
+>...[...empty] : number
+>[...empty] : number[]
+>...empty : number
+>empty : number[]
+>add : (a: number, b: number) => number
+
+const possiblyExcess = ...[...[1, 2, 3, 4]] |> add;
+>possiblyExcess : number
+>...[...[1, 2, 3, 4]] |> add : number
+>...[...[1, 2, 3, 4]] : number
+>[...[1, 2, 3, 4]] : number[]
+>...[1, 2, 3, 4] : number
+>[1, 2, 3, 4] : number[]
+>1 : 1
+>2 : 2
+>3 : 3
+>4 : 4
+>add : (a: number, b: number) => number
+
+const mixedPrefix = ...["head", ...Foo] |> prefix;
+>mixedPrefix : number
+>...["head", ...Foo] |> prefix : number
+>...["head", ...Foo] : string | number
+>["head", ...Foo] : (string | number)[]
+>"head" : "head"
+>...Foo : number
+>Foo : number[]
+>prefix : (head: string, a: number, b: number) => number
+
+const mixedSuffix = ...[...Foo, 1] |> add;
+>mixedSuffix : number
+>...[...Foo, 1] |> add : number
+>...[...Foo, 1] : number
+>[...Foo, 1] : number[]
+>...Foo : number
+>Foo : number[]
+>1 : 1
+>add : (a: number, b: number) => number
+
+const multiple = ...[...Foo, ...readonlyValues] |> add;
+>multiple : number
+>...[...Foo, ...readonlyValues] |> add : number
+>...[...Foo, ...readonlyValues] : number
+>[...Foo, ...readonlyValues] : number[]
+>...Foo : number
+>Foo : number[]
+>...readonlyValues : number
+>readonlyValues : readonly number[]
+>add : (a: number, b: number) => number
+
+const optionalResult = ...[...Foo] |> optional;
+>optionalResult : number
+>...[...Foo] |> optional : number
+>...[...Foo] : number
+>[...Foo] : number[]
+>...Foo : number
+>Foo : number[]
+>optional : (a?: number, b?: number) => number
+
+const restResult = ...[...Foo] |> rest;
+>restResult : number
+>...[...Foo] |> rest : number
+>...[...Foo] : number
+>[...Foo] : number[]
+>...Foo : number
+>Foo : number[]
+>rest : (a: number, ...args: number[]) => number
+
+const selected = ...[...strings] |> select;
+>selected : string
+>...[...strings] |> select : string
+>...[...strings] : string
+>[...strings] : string[]
+>...strings : string
+>strings : string[]
+>select : { (a: number, b: number): number; (a: string, b: string): string; }
+
+const generic = ...[...Foo] |> merge;
+>generic : number
+>...[...Foo] |> merge : number
+>...[...Foo] : number
+>[...Foo] : number[]
+>...Foo : number
+>Foo : number[]
+>merge : <T>(a: T, b: T) => T
+
+const separate = ...[...Foo] |> pair;
+>separate : [number, number]
+>...[...Foo] |> pair : [number, number]
+>...[...Foo] : number
+>[...Foo] : number[]
+>...Foo : number
+>Foo : number[]
+>pair : <A, B>(a: A, b: B) => [A, B]
+
+const captured = ...[...Foo] |> capture;
+>captured : number[]
+>...[...Foo] |> capture : number[]
+>...[...Foo] : number
+>[...Foo] : number[]
+>...Foo : number
+>Foo : number[]
+>capture : <T extends unknown[]>(...args: T) => T
+
+const fixedRestTuple = ...[...Foo] |> tupleRest;
+>fixedRestTuple : number
+>...[...Foo] |> tupleRest : number
+>...[...Foo] : number
+>[...Foo] : number[]
+>...Foo : number
+>Foo : number[]
+>tupleRest : (args_0: number, args_1: number) => number
+
+const variadicSuffix = ...[...Foo, true] |> variadic;
+>variadicSuffix : number
+>...[...Foo, true] |> variadic : number
+>...[...Foo, true] : number | true
+>[...Foo, true] : (number | true)[]
+>...Foo : number
+>Foo : number[]
+>true : true
+>variadic : <T>(...args: [...T[], boolean]) => T
+
+const contextual = ...[n => n.toFixed().length, ...Foo] |> callback;
+>contextual : number
+>...[n => n.toFixed().length, ...Foo] |> callback : number
+>...[n => n.toFixed().length, ...Foo] : number | ((n: number) => number)
+>[n => n.toFixed().length, ...Foo] : (number | ((n: number) => number))[]
+>n => n.toFixed().length : (n: number) => number
+>n : number
+>n.toFixed().length : number
+>n.toFixed() : string
+>n.toFixed : (fractionDigits?: number) => string
+>n : number
+>toFixed : (fractionDigits?: number) => string
+>length : number
+>...Foo : number
+>Foo : number[]
+>callback : (cb: (n: number) => number, ...args: number[]) => number
+
+const inline = ...[...Foo] |> ((a, b) => a.toFixed() + b.toFixed());
+>inline : string
+>...[...Foo] |> ((a, b) => a.toFixed() + b.toFixed()) : string
+>...[...Foo] : number
+>[...Foo] : number[]
+>...Foo : number
+>Foo : number[]
+>((a, b) => a.toFixed() + b.toFixed()) : (a: number, b?: number) => string
+>(a, b) => a.toFixed() + b.toFixed() : (a: number, b?: number) => string
+>a : number
+>b : number
+>a.toFixed() + b.toFixed() : string
+>a.toFixed() : string
+>a.toFixed : (fractionDigits?: number) => string
+>a : number
+>toFixed : (fractionDigits?: number) => string
+>b.toFixed() : string
+>b.toFixed : (fractionDigits?: number) => string
+>b : number
+>toFixed : (fractionDigits?: number) => string
+
+const inlineRest = ...[...Foo] |> ((head, ...tail) => head + tail[0]);
+>inlineRest : number
+>...[...Foo] |> ((head, ...tail) => head + tail[0]) : number
+>...[...Foo] : number
+>[...Foo] : number[]
+>...Foo : number
+>Foo : number[]
+>((head, ...tail) => head + tail[0]) : (head: number, ...tail: number[]) => number
+>(head, ...tail) => head + tail[0] : (head: number, ...tail: number[]) => number
+>head : number
+>tail : number[]
+>head + tail[0] : number
+>head : number
+>tail[0] : number
+>tail : number[]
+>0 : 0
+
+declare const optionalTuple: [number?];
+>optionalTuple : [(number | undefined)?]
+
+declare function acceptsOptional(a: number | undefined, b: number | undefined): void;
+>acceptsOptional : (a: number | undefined, b: number | undefined) => void
+>a : number | undefined
+>b : number | undefined
+
+...[...optionalTuple, ...Foo] |> acceptsOptional;
+>...[...optionalTuple, ...Foo] |> acceptsOptional : void
+>...[...optionalTuple, ...Foo] : number | undefined
+>[...optionalTuple, ...Foo] : (number | undefined)[]
+>...optionalTuple : number | undefined
+>optionalTuple : [(number | undefined)?]
+>...Foo : number
+>Foo : number[]
+>acceptsOptional : (a: number | undefined, b: number | undefined) => void
+
+function genericSource<T>(values: T[]) {
+>genericSource : <T>(values: T[]) => [T, T]
+>values : T[]
+
+    return ...[...values] |> pair;
+>...[...values] |> pair : [T, T]
+>...[...values] : T
+>[...values] : T[]
+>...values : T
+>values : T[]
+>pair : <A, B>(a: A, b: B) => [A, B]
+}
+
